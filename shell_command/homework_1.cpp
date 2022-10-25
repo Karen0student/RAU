@@ -6,8 +6,8 @@
 
 int main(int argc, char** argv){
 
-    if(argc < 1){
-        std::cout << "enter arugments";
+    if(argc < 2){
+        std::cout << "enter arugments" << std::endl;
         exit(errno);
     }
 
