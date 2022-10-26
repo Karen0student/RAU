@@ -11,33 +11,33 @@ int main(int argc, char** argv){
         exit(errno);
     }
 
-    pid_t pid = fork();
     for(int i = 1; i < argc; ++i){
+        pid_t pid = fork();
         if(pid == -1){
             std::cout << "Error" << std::endl;
             exit(errno);
         }
         if(pid == 0){ //child
-            
             char* arg_vec[] = {argv[i], nullptr};
             if(execvp(argv[i], arg_vec) < 0){
-                std::cout  << "execvp error on command: " << argv[i] << std::endl;
-                continue;
+                _exit(2);
             }
             execvp(argv[i], arg_vec);
+            _exit(0);
         }
-        
-        else{ //parent
+
+        if(pid > 0){ //parent
             int status;
             wait(&status);
-
-            if(WIFEXITED(status)){
-                _exit(0);
+            //std::cout << WIFEXITED(status) << " " << WEXITSTATUS(status) << std::endl;
+            if(WIFEXITED(status) == 1 && WEXITSTATUS(status) == 0){
+                std::cout << "***program finished***" << std::endl;
+                exit(0);
             }
-
         }
     }
+    
+    std::cout << "***program finished, nothing passed***" << std::endl;
 
-    std::cout << "***program finished***" << std::endl;
     return 0;
 }
