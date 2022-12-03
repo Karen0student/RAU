@@ -5,27 +5,31 @@
 #include <pthread.h>
 #include <string>
 #include <cmath>
+#include <cstring>
 
 
-void* threadFunc(void* file_number){
+void* threadFunc(void* arg){
     std::cout << "entered threadFunc" << std::endl;
     int fd = 0;
-    std::string file_name = "out_" + ((std::string*)file_number)[0] + ".txt";
+    std::string file_name = "out_" + ((std::string*)arg)[0] + ".txt";
+    std::cout << file_name << std::endl;
     fd = open(file_name.c_str(), O_TRUNC | O_CREAT, 0755);
     if(fd < 0){
         std::cout << "ERROR opening file" << std::endl;
         exit(0);
     }
     std::cout << "after opening file" << std::endl;
+    std::string str;
     int x, y;
-    char arg;
-    std::cin >> x >> y;
-    std::cin >> arg;
-    std::string str; 
+    x = ((int*)arg)[1];
+    y = ((int*)arg)[2];
     int fda;
-    switch(arg){
+    std::cout << ((std::string*)arg)[3] << std::endl;
+    //const std::string* symbol = (((std::string*)arg)[3]).c_str(); 
+    switch(((std::string*)arg)[3]){
         case 's':// +
             str = std::to_string(x) + " s " + std::to_string(y) + " = " + std::to_string(x + y);
+            std::cout << str.size() << std::endl;
             fda = write(fd, &str, str.size());
             if(fda < 0){
                 std::cout << "ERROR(+)" << std::endl;
@@ -35,7 +39,7 @@ void* threadFunc(void* file_number){
                 std::cout << "cant close fd" << std::endl;
                 exit(0);
             }
-            break; 
+            pthread_exit(NULL);
         case 'm':// *
             str = std::to_string(x) + " m " + std::to_string(y) + " = " + std::to_string(x * y);
             fda = write(fd, &str, str.size());
@@ -47,7 +51,7 @@ void* threadFunc(void* file_number){
                 std::cout << "cant close fd" << std::endl;
                 exit(0);
             }
-            break;
+            pthread_exit(NULL);
         case 'ss':// ^, +
             str = std::to_string(x) + " s " + std::to_string(y) + " = " + std::to_string(pow(x, x) + pow(y, y));
             fda = write(fd, &str, str.size());
@@ -59,14 +63,14 @@ void* threadFunc(void* file_number){
                 std::cout << "cant close fd" << std::endl;
                 exit(0);
             }
-            break;
+            pthread_exit(NULL);
         default:
             std::cout << "Error! The operator is not correct";
             if(close(fd) < 0){
                 std::cout << "cant close fd" << std::endl;
                 exit(0);
             }
-            break;
+            pthread_exit(NULL);
     }
     pthread_exit(NULL);
     
@@ -77,7 +81,6 @@ int main(int argc, char** argv){
     //     std::cout << "***program finished, nothing passed***" << std::endl;
     //     exit(0);
     // }
-
     pthread_t tid;
     for(int i = 0; i < atoi(argv[1]); ++i){   
         std::cout << "entered cycle" << std::endl;
@@ -85,7 +88,11 @@ int main(int argc, char** argv){
         // char* arg = new char;
         // arg = (char*)i;
         std::cout << "before thread" << std::endl;
-        int threadRes = pthread_create(&tid, NULL, &threadFunc, (int*) i);
+        std::string x, y, argument;
+        std::cin >> x >> y >> argument;
+
+        std::string arg [4] = {std::to_string(i), x, y, argument};
+        int threadRes = pthread_create(&tid, NULL, &threadFunc, (std::string*)&arg);
         if(threadRes != 0){
             std::cout << "Could not create thread\n";
             exit(0);
