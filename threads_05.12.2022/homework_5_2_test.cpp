@@ -50,11 +50,16 @@ void* threadFunc(void* file_number){
             break;
         case 'ss':// ^, +
             str = std::to_string(x) + " s " + std::to_string(y) + " = " + std::to_string(pow(x, x) + pow(y, y));
-        break;
-        if(close(fd) < 0){
-            std::cout << "cant close fd" << std::endl;
-            exit(0);
-        }
+            fda = write(fd, &str, str.size());
+            if(fda < 0){
+                std::cout << "ERROR(+)" << std::endl;
+                exit(0);
+            }
+            if(close(fd) < 0){
+                std::cout << "cant close fd" << std::endl;
+                exit(0);
+            }
+            break;
         default:
             std::cout << "Error! The operator is not correct";
             if(close(fd) < 0){
