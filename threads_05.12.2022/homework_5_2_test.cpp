@@ -20,8 +20,8 @@ void* threadFunc(void* arg){
     }
     std::cout << "after opening file" << std::endl;
     
-    int *x = &((int*)arg)[1];
-    int *y = &((int*)arg)[2];
+    int x = ((int*)arg)[1];
+    int y = ((int*)arg)[2];
     
     //check
     std::cout << "arg[1] = " << ((std::string*)arg)[1] << " arg[2] = " << ((std::string*)arg)[2] << std::endl;
@@ -32,7 +32,7 @@ void* threadFunc(void* arg){
     std::cout << ((std::string*)arg)[3] << std::endl;
     //const std::string* symbol = (((std::string*)arg)[3]).c_str(); 
         if(((std::string*)arg)[3] == "s"){
-            std::string str = ((std::string*)arg)[1] + " s " + ((std::string*)arg)[2] + " = " + std::to_string(&x + &y);
+            std::string str = ((std::string*)arg)[1] + " s " + ((std::string*)arg)[2] + " = " + std::to_string(x + y);
             std::cout << str.size() << std::endl;
             fda = write(fd, &str, str.size());
             if(fda < 0){
