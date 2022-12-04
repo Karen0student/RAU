@@ -19,16 +19,20 @@ void* threadFunc(void* arg){
         exit(0);
     }
     std::cout << "after opening file" << std::endl;
-    std::string str;
-    int x, y;
-    x = ((int*)arg)[1];
-    y = ((int*)arg)[2];
+    
+    int *x = &((int*)arg)[1];
+    int *y = &((int*)arg)[2];
+    
+    //check
+    std::cout << "arg[1] = " << ((std::string*)arg)[1] << " arg[2] = " << ((std::string*)arg)[2] << std::endl;
+    std::cout << "x = " << x << " y = " << y << std::endl;
+    //
+
     int fda;
     std::cout << ((std::string*)arg)[3] << std::endl;
     //const std::string* symbol = (((std::string*)arg)[3]).c_str(); 
-    switch(((std::string*)arg)[3]){
-        case 's':// +
-            str = std::to_string(x) + " s " + std::to_string(y) + " = " + std::to_string(x + y);
+        if(((std::string*)arg)[3] == "s"){
+            std::string str = ((std::string*)arg)[1] + " s " + ((std::string*)arg)[2] + " = " + std::to_string(&x + &y);
             std::cout << str.size() << std::endl;
             fda = write(fd, &str, str.size());
             if(fda < 0){
@@ -40,8 +44,9 @@ void* threadFunc(void* arg){
                 exit(0);
             }
             pthread_exit(NULL);
-        case 'm':// *
-            str = std::to_string(x) + " m " + std::to_string(y) + " = " + std::to_string(x * y);
+        }
+        if(((std::string*)arg)[3] == "m"){// *
+            std::string str = std::to_string(x) + " m " + std::to_string(y) + " = " + std::to_string(x * y);
             fda = write(fd, &str, str.size());
             if(fda < 0){
                 std::cout << "ERROR(*)" << std::endl;
@@ -52,8 +57,9 @@ void* threadFunc(void* arg){
                 exit(0);
             }
             pthread_exit(NULL);
-        case 'ss':// ^, +
-            str = std::to_string(x) + " s " + std::to_string(y) + " = " + std::to_string(pow(x, x) + pow(y, y));
+        }
+        if(((std::string*)arg)[3] == "ss"){// ^, +
+            std::string str = std::to_string(x) + " s " + std::to_string(y) + " = " + std::to_string(pow(x, x) + pow(y, y));
             fda = write(fd, &str, str.size());
             if(fda < 0){
                 std::cout << "ERROR(+)" << std::endl;
@@ -64,15 +70,15 @@ void* threadFunc(void* arg){
                 exit(0);
             }
             pthread_exit(NULL);
-        default:
+        }
+        else{
             std::cout << "Error! The operator is not correct";
             if(close(fd) < 0){
                 std::cout << "cant close fd" << std::endl;
                 exit(0);
             }
             pthread_exit(NULL);
-    }
-    pthread_exit(NULL);
+        }
     
 }
 
