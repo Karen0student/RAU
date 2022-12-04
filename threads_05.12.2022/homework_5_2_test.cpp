@@ -13,7 +13,7 @@ void* threadFunc(void* arg){
     int fd = 0;
     std::string file_name = "out_" + ((std::string*)arg)[0] + ".txt";
     std::cout << file_name << std::endl;
-    fd = open(file_name.c_str(), O_TRUNC | O_CREAT, 0755);
+    fd = open(file_name.c_str(), O_TRUNC | O_CREAT | O_RDWR, 0755);
     if(fd < 0){
         std::cout << "ERROR opening file" << std::endl;
         exit(0);
@@ -34,7 +34,7 @@ void* threadFunc(void* arg){
         if(((std::string*)arg)[3] == "s"){
             std::string str = ((std::string*)arg)[1] + " s " + ((std::string*)arg)[2] + " = " + std::to_string(x + y);
             std::cout << str.size() << std::endl;
-            fda = write(fd, &str, str.size());
+            fda = write(fd, str.c_str(), str.size());
             if(fda < 0){
                 std::cout << "ERROR(+)" << std::endl;
                 exit(0);
@@ -47,7 +47,7 @@ void* threadFunc(void* arg){
         }
         if(((std::string*)arg)[3] == "m"){// *
             std::string str = std::to_string(x) + " m " + std::to_string(y) + " = " + std::to_string(x * y);
-            fda = write(fd, &str, str.size());
+            fda = write(fd, str.c_str(), str.size());
             if(fda < 0){
                 std::cout << "ERROR(*)" << std::endl;
                 exit(0);
@@ -60,7 +60,7 @@ void* threadFunc(void* arg){
         }
         if(((std::string*)arg)[3] == "ss"){// ^, +
             std::string str = std::to_string(x) + " s " + std::to_string(y) + " = " + std::to_string(pow(x, x) + pow(y, y));
-            fda = write(fd, &str, str.size());
+            fda = write(fd, str.c_str(), str.size());
             if(fda < 0){
                 std::cout << "ERROR(+)" << std::endl;
                 exit(0);
