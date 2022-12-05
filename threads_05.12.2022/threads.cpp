@@ -76,18 +76,18 @@ void* threadFunc(void* arg){
 }
 
 int main(int argc, char** argv){
-    pthread_t tid;
-    thread_data object;
+    pthread_t tids[atoi(argv[1])];
+    thread_data objects[atoi(argv[1])];
     for(int i = 0; i < atoi(argv[1]); ++i){   
-        object.index = i;
-        std::cin >> object.num1 >> object.num2 >> object.symbol;
-        int threadRes = pthread_create(&tid, NULL, threadFunc, (void*)&object);
+        objects[i].index = i;
+        std::cin >> objects[i].num1 >> objects[i].num2 >> objects[i].symbol;
+        int threadRes = pthread_create(&tids[i], NULL, threadFunc, (void*)&objects[i]);
         if(threadRes != 0){
             std::cout << "Could not create thread\n";
             exit(0);
         }
     }
     for(int i = 0; i < atoi(argv[1]); ++i){
-        int join = pthread_join(tid, NULL);
+        int join = pthread_join(tids[i], NULL);
     }
 }
