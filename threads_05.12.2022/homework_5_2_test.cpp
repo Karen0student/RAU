@@ -18,8 +18,7 @@ void* threadFunc(void* arg){
     thread_data* args = (thread_data*) arg;
     int fd = 0;
     std::string file_name = "out_" + std::to_string(args->index) + ".txt";
-    std::cout << "index in thread is: " << args->index << std::endl;
-    fd = open(file_name.c_str(), O_TRUNC | O_CREAT | O_RDWR, 0755);
+    fd = open(file_name.c_str(), O_TRUNC | O_CREAT | O_RDWR, 0666);
     if(fd < 0){
         std::cout << "ERROR opening file" << std::endl;
         exit(0);
@@ -29,6 +28,7 @@ void* threadFunc(void* arg){
         if(args->symbol == "s"){
             std::string str = std::to_string(args->num1) + " s " + std::to_string(args->num2) + " = " + std::to_string(args->num1 + args->num2);
             fda = write(fd, str.c_str(), str.size());
+            std::cout << "completed \"s\" " << std::endl;
             if(fda < 0){
                 std::cout << "ERROR(+)" << std::endl;
                 exit(0);
@@ -80,10 +80,8 @@ int main(int argc, char** argv){
     pthread_t tid;
     thread_data object;
     for(int i = 0; i < atoi(argv[1]); ++i){   
-        std::cout << "in cycle" << std::endl;
         object.index = i;
         std::cin >> object.num1 >> object.num2 >> object.symbol;
-        std::cout << "index in cycle is: " << object.index << std::endl;
         int threadRes = pthread_create(&tid, NULL, threadFunc, (void*)&object);
         if(threadRes != 0){
             std::cout << "Could not create thread\n";
