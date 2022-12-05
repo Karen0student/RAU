@@ -16,33 +16,18 @@ struct thread_data{
 
 void* threadFunc(void* arg){
     thread_data* args = (thread_data*) arg;
-    std::cout << "entered threadFunc" << std::endl;
     int fd = 0;
-    //std::cout << args->num1  << " " << args->num2 << std::endl;
     std::string file_name = "out_" + std::to_string(args->index) + ".txt";
-    std::cout << file_name << std::endl;
+    std::cout << "index in thread is: " << args->index << std::endl;
     fd = open(file_name.c_str(), O_TRUNC | O_CREAT | O_RDWR, 0755);
     if(fd < 0){
         std::cout << "ERROR opening file" << std::endl;
         exit(0);
     }
-    std::cout << "after opening file" << std::endl;
-    
-    
-    // int x = ((int*)arg)[1];
-    // int y = ((int*)arg)[2];
-//change args to args
-    //check
-    //std::cout << "arg[1] = " << ((std::string*)arg)[1] << " arg[2] = " << ((std::string*)arg)[2] << std::endl;
-    std::cout << "x = " << args->num1 << " y = " << args->num2 << std::endl;
-    //
 
-    int fda;
-    std::cout << args->symbol << std::endl;
-    //const std::string* symbol = (((std::string*)arg)[3]).c_str(); 
+    int fda; 
         if(args->symbol == "s"){
             std::string str = std::to_string(args->num1) + " s " + std::to_string(args->num2) + " = " + std::to_string(args->num1 + args->num2);
-            std::cout << str.size() << std::endl;
             fda = write(fd, str.c_str(), str.size());
             if(fda < 0){
                 std::cout << "ERROR(+)" << std::endl;
@@ -68,7 +53,7 @@ void* threadFunc(void* arg){
             pthread_exit(NULL);
         }
         if(args->symbol == "ss"){// ^, +
-            std::string str = std::to_string(args->num1) + " s " + std::to_string(args->num2) + " = " + std::to_string(pow(args->num1, args->num1) + pow(args->num2, args->num2));
+            std::string str = std::to_string(args->num1) + " ss " + std::to_string(args->num2) + " = " + std::to_string(pow(args->num1, 2) + pow(args->num2, 2));
             fda = write(fd, str.c_str(), str.size());
             if(fda < 0){
                 std::cout << "ERROR(+)" << std::endl;
@@ -93,20 +78,19 @@ void* threadFunc(void* arg){
 
 int main(int argc, char** argv){
     pthread_t tid;
+    thread_data object;
     for(int i = 0; i < atoi(argv[1]); ++i){   
-        std::cout << "entered cycle" << std::endl;
-
-        std::cout << "before thread" << std::endl;
-        thread_data object;
+        std::cout << "in cycle" << std::endl;
         object.index = i;
         std::cin >> object.num1 >> object.num2 >> object.symbol;
-
+        std::cout << "index in cycle is: " << object.index << std::endl;
         int threadRes = pthread_create(&tid, NULL, threadFunc, (void*)&object);
         if(threadRes != 0){
             std::cout << "Could not create thread\n";
             exit(0);
         }
-        void* retval;
-        int join = pthread_join(tid, &retval);
+    }
+    for(int i = 0; i < atoi(argv[1]); ++i){
+        int join = pthread_join(tid, NULL);
     }
 }
