@@ -65,7 +65,7 @@ int main () {
     clock_gettime(CLOCK_REALTIME, &end);
     long seconds = end.tv_sec - begin.tv_sec;
     long milliseconds = end.tv_nsec - begin.tv_nsec;
-    std::string result = std::to_string(seconds + milliseconds * 1e-9) + "\n";
+    std::string result = "sync_semaphore time is: " + std::to_string(seconds + milliseconds * 1e-9) + "\n";
     int fd = open("time.txt", O_CREAT | O_RDWR | O_APPEND, 0666);
     write(fd, result.c_str(), result.size());
     if(close(fd) < 0){
