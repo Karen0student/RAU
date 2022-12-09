@@ -43,7 +43,6 @@ void* inc(void* arg){
 int main () {
     struct timespec begin, end;
     clock_gettime(CLOCK_REALTIME, &begin);
-    int start = clock();
     int thread_num = 56;
     Integer* integ = new Integer(0);
     pthread_t* thrds = new pthread_t[thread_num];
