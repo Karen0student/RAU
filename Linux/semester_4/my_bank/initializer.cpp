@@ -34,7 +34,7 @@ bank_type *create_bank(int num_accounts, int max_balance){
     //bank->accounts = accounts;
 
     for(int i = 0; i < num_accounts; i++) {
-        bank->accounts[i].balance = 0;
+        bank->accounts[i].balance = 10;
         //std::cout << i << ": " << bank->accounts[i].balance << std::endl; //checking
         bank->accounts[i].min_balance = 0;
         bank->accounts[i].max_balance = max_balance;
