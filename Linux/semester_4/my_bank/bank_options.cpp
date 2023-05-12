@@ -89,35 +89,65 @@ void add_remove_money(bank_type *bank, int amount, int option){
     }
     
     if(option == 1){
+        system("clear");
         for(int i = 0; i < bank->num_accounts; ++i){
             if(bank->accounts[i].frozen == true){
                 std::cout << "*account: " << i << " frozen, SKIPPING*\n";
                 continue;
             }
             if(bank->accounts[i].balance + amount > bank->accounts[i].max_balance && bank->accounts[i].frozen != true){ // second argument for additional protection
-                std::cout << "***reached maximum balance limit for account:" << i << "SKIPPING***\n";
+                std::cout << "***reached maximum balance limit for account:" << i << "  SKIPPING***\n";
                 continue;
             }
             bank->accounts[i].balance += amount;
         }
-        system("clear");
         std::cout << "**money added successfully**\n";
         return;
     }
     else if(option == 2){
+        system("clear");
         for(int i = 0; i < bank->num_accounts; ++i){
             if(bank->accounts[i].frozen == true){
                 std::cout << "*account: " << i << " frozen, SKIPPING*\n";
                 continue;
             }
             if(bank->accounts[i].balance - amount < bank->accounts[i].min_balance && bank->accounts[i].frozen != true){ // second argument for additional protection
-                std::cout << "***reached minimum balance limit for account:" << i << "SKIPPING***\n";
+                std::cout << "***reached minimum balance limit for account:" << i << "  SKIPPING***\n";
                 continue;
             }
             bank->accounts[i].balance -= amount;
         }
-        system("clear");
         std::cout << "**money withdrawed successfully**\n";
         return;
     }
+}
+
+void set_min_balance(bank_type *bank, int account_num, int min_balance) {
+    if(account_num >= bank->num_accounts){
+        std::cout << "***Invalid account number***\n";
+        return;
+    }
+    if(bank->accounts[account_num].balance < min_balance){
+        std::cout << "***FAILED: balance is less than new minimum balance***\n";
+        return;
+    }
+    bank->accounts[account_num].min_balance = min_balance;
+    system("clear");
+    std::cout << "**MINIMUM BALANCE SET SUCCESSFULLY**\n";
+    return;
+}
+
+void set_max_balance(bank_type *bank, int account_num, int max_balance) {
+    if(account_num >= bank->num_accounts){
+        std::cout << "***Invalid account number***\n";
+        return;
+    }
+    if(bank->accounts[account_num].balance > max_balance){
+        std::cout << "***FAILED: balance is more than new minimum balance***\n";
+        return;
+    }
+    bank->accounts[account_num].max_balance = max_balance;
+    system("clear");
+    std::cout << "**MAXIMUM BALANCE SET SUCCESSFULLY**\n";
+    return;
 }

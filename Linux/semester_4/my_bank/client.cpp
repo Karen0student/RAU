@@ -35,21 +35,22 @@ void client(bank_type *bank){
         std::cout << "3)transfer X amount of money from account A to account B, X > 0\n";
         std::cout << "4)add/remove from all accounts X units\n";
         std::cout << "5)set the given minimum/maximum possible balance X for the account with the given number A\n";
+        std::cout << "6)Exit\n";
         std::cout << "enter option: ";
-        int option;
+        std::string option;
         std::cin >> option;
 
-        if(option == 1){
+        if(option == "1"){
             int account_number = check_account_number(bank);
             display(bank, account_number);
             continue;
         }
-        else if(option == 2){
+        else if(option == "2"){
             int account_number = check_account_number(bank);
             account_freeze(bank, account_number);
             continue;
         }
-        else if(option == 3){
+        else if(option == "3"){
             int account_number1, account_number2;
             std::cout << "Enter first account number: ";
             std::cin >> account_number1;
@@ -63,7 +64,7 @@ void client(bank_type *bank){
             transfer(bank, account_number1, account_number2, amount);
             continue;
         }
-        else if(option == 4){
+        else if(option == "4"){
             std::cout << "what would you like\n" << "1)add money\n" << "2)withdraw money\n" << "option:";
             int option;
             std::cin >> option;
@@ -73,5 +74,38 @@ void client(bank_type *bank){
             add_remove_money(bank, amount, option);
             continue;
         }
+        else if(option == "5"){
+            std::cout << "what would you like\n" << "1)set new maximum balance\n" << "2)set new minimum balance\n" << "option: ";
+            int option;
+            std::cin >> option;
+            if(option == 1){
+                std::cout << "Enter account number: ";
+                int account_number;
+                std::cin >> account_number;
+                std::cout << "Enter new maximum balance: ";
+                int maximum_balance;
+                std::cin >> maximum_balance;
+                set_max_balance(bank, account_number, maximum_balance);
+                continue;
+            }
+            if(option == 2){
+                std::cout << "Enter account number: ";
+                int account_number;
+                std::cin >> account_number;
+                std::cout << "Enter new minimum balance: ";
+                int minimum_balance;
+                std::cin >> minimum_balance;
+                set_min_balance(bank, account_number, minimum_balance);
+                continue;
+            }
+        }
+        else if(option == "6"){
+            return;
+        }
+        else{
+            std::cout << "***incorrect number, try again***\n";
+            continue;
+        }
     }
+    return; // not necessary
 }

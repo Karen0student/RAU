@@ -26,6 +26,6 @@ void display(const bank_type *bank, int account_num);
 void account_freeze(bank_type *bank, int account_num);
 void transfer(bank_type *bank, int account1, int account2, int amount);
 void add_remove_money(bank_type *bank, int amount, int option);
-
-
+void set_min_balance(bank_type *bank, int account_num, int min_balance);
+void set_max_balance(bank_type *bank, int account_num, int max_balance);
 #endif
