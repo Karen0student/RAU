@@ -2,11 +2,11 @@
 #include "bank.h"
 
 void display(const bank_type *bank, int account_num) {
-    if(account_num >= bank->num_accounts) {
+    if(account_num >= bank->num_accounts){
         std::cout << "***Invalid account number***\n";
         return;
     }
-    system("clear");
+    //system("clear");
     std::cout << "\naccount number: " << account_num << "     balance: " <<  bank->accounts[account_num].balance << "$      minimum balance: " <<  bank->accounts[account_num].min_balance << "$      maximum balance: " << 
             bank->accounts[account_num].max_balance << "$     account status: ";
     if(bank->accounts[account_num].frozen == true){
@@ -14,6 +14,19 @@ void display(const bank_type *bank, int account_num) {
     }
     else{
         std::cout << "not frozen\n";
+    }
+}
+void display_all(const bank_type *bank) {
+    //system("clear");
+    for(int i = 0; i < bank->num_accounts; ++i){
+        std::cout << "\naccount number: " << i << "     balance: " <<  bank->accounts[i].balance << "$      minimum balance: " <<  bank->accounts[i].min_balance << "$      maximum balance: " << 
+                bank->accounts[i].max_balance << "$     account status: ";
+        if(bank->accounts[i].frozen == true){
+            std::cout << "frozen\n";
+        }
+        else{
+            std::cout << "not frozen\n";
+        }
     }
 }
 
@@ -29,23 +42,24 @@ void account_freeze(bank_type *bank, int account_num) {
         std::cin >> option;
         if(option == 1){
             if(bank->accounts[account_num].frozen == true){
-                system("clear");
+                //system("clear");
                 std::cout << "*Account already frozen*\n";
                 break;
             }
             bank->accounts[account_num].frozen = true;
-            system("clear");
+            //system("clear");
             std::cout << "*Account has been frozen*\n";
             break;
         }
+
         else if(option == 2){
             if(bank->accounts[account_num].frozen == false){
-                system("clear");
+                //system("clear");
                 std::cout << "*Account already unfrozen*\n";
                 break;
             }
             bank->accounts[account_num].frozen = false;
-            system("clear");
+            //system("clear");
             std::cout << "*Account has been unfrozen*\n";
             break;
         }
@@ -78,7 +92,7 @@ void transfer(bank_type *bank, int account1, int account2, int amount) {
 
     bank->accounts[account1].balance -= amount;
     bank->accounts[account2].balance += amount;
-    system("clear");
+    //system("clear");
     std::cout << "Transferred: " << amount << "$ from account: "<< account1 << " to account: " << account2 << std::endl;
 }
 
@@ -89,7 +103,7 @@ void add_remove_money(bank_type *bank, int amount, int option){
     }
     
     if(option == 1){
-        system("clear");
+        //system("clear");
         for(int i = 0; i < bank->num_accounts; ++i){
             if(bank->accounts[i].frozen == true){
                 std::cout << "*account: " << i << " frozen, SKIPPING*\n";
@@ -105,7 +119,7 @@ void add_remove_money(bank_type *bank, int amount, int option){
         return;
     }
     else if(option == 2){
-        system("clear");
+        //system("clear");
         for(int i = 0; i < bank->num_accounts; ++i){
             if(bank->accounts[i].frozen == true){
                 std::cout << "*account: " << i << " frozen, SKIPPING*\n";
@@ -132,7 +146,7 @@ void set_min_balance(bank_type *bank, int account_num, int min_balance) {
         return;
     }
     bank->accounts[account_num].min_balance = min_balance;
-    system("clear");
+    //system("clear");
     std::cout << "**MINIMUM BALANCE SET SUCCESSFULLY**\n";
     return;
 }
@@ -147,7 +161,7 @@ void set_max_balance(bank_type *bank, int account_num, int max_balance) {
         return;
     }
     bank->accounts[account_num].max_balance = max_balance;
-    system("clear");
+    //system("clear");
     std::cout << "**MAXIMUM BALANCE SET SUCCESSFULLY**\n";
     return;
 }

@@ -23,6 +23,7 @@ struct struct_bank {
 bank_type *create_bank(int num_accounts, int max_balance);
 void client(bank_type *bank);
 void display(const bank_type *bank, int account_num);
+void display_all(const bank_type *bank);
 void account_freeze(bank_type *bank, int account_num);
 void transfer(bank_type *bank, int account1, int account2, int amount);
 void add_remove_money(bank_type *bank, int amount, int option);

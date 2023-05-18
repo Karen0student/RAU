@@ -14,7 +14,7 @@ bank_type *create_bank(int num_accounts, int max_balance){
         return NULL;
     }
     size_t size = sizeof(bank_type) + num_accounts * sizeof(account_type);
-    int shm_id = shmget(key, size, IPC_CREAT | 0666);
+    int shm_id = shmget(key, size, IPC_CREAT | IPC_EXCL | 0666);
     if(shm_id < 0){
         std::cout << "ERROR, FAILED TO CREATE SHARED MEMORY\n";
         return NULL;
@@ -68,6 +68,5 @@ int main(int argc, char* argv[]){
     bank_type *bank = create_bank(num_accounts, max_balance);
     //std::cout <<  "1: " << bank->accounts[1].balance << std::endl; //checking
 
-    client(bank);
     return 0;
 }
