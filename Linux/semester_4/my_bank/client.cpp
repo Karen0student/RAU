@@ -1,6 +1,13 @@
 #include <iostream>
 #include <sys/shm.h>
+#include <sys/sem.h>
 #include "bank.h"
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
+#include <semaphore.h>
+#include <unistd.h> //for sleep function
+#include "semaphore_names.h"
+
 
 int check_given_account_number(bank_type *bank, int account_number){
      while(true){
@@ -30,6 +37,23 @@ int check_account_number(bank_type *bank){
 }
 
 void client(bank_type *bank){
+    
+    // Create or open a named semaphore
+    // sem_unlink("/transfer");
+    // sem_unlink("/freeze_unfreeze");
+    sem_t* sem_transfer;
+    sem_transfer = sem_open(semaphoreNameTransfer, O_CREAT | O_EXCL, 0666, semaphoreInitialTransferValue); //from bank.h
+    if (sem_transfer == SEM_FAILED) {
+        std::cerr << "***Failed to create/open semaphore for transfer***\n";
+        exit(1);
+    }
+    sem_t* sem_FreezeUnfreeze;
+    sem_FreezeUnfreeze = sem_open(semaphoreNameFreezeUnfreeze, O_CREAT | O_EXCL, 0666, semaphoreInitialFreezeUnfreezeValue); //from bank.h
+    if (sem_FreezeUnfreeze == SEM_FAILED) {
+        std::cerr << "***Failed to create/open semaphore for freeze and unfreeze***\n";
+        exit(1);
+    }
+
     while(true){
         std::cout << "\n1)display the current/minimum/maximum account balance\n";
         std::cout << "2)display all accounts\n";
@@ -53,7 +77,16 @@ void client(bank_type *bank){
         }
         else if(option == "3"){
             int account_number = check_account_number(bank);
+            int check_semaphore_value;
+            while(sem_getvalue(sem_FreezeUnfreeze, &check_semaphore_value) != 1){
+                std::cout << "waiting...\n";
+                sleep(1);
+            }
+            sem_wait(sem_FreezeUnfreeze);
             account_freeze(bank, account_number);
+            std::cout << "processing...\n";
+            sleep(3);
+            sem_post(sem_FreezeUnfreeze);
             continue;
         }
         else if(option == "4"){
@@ -67,7 +100,7 @@ void client(bank_type *bank){
             std::cout << "Enter amount to transfer: ";
             int amount;
             std::cin >> amount;
-            transfer(bank, account_number1, account_number2, amount);
+            transfer(bank, account_number1, account_number2, amount, sem_transfer);
             continue;
         }
         else if(option == "5"){
@@ -105,7 +138,9 @@ void client(bank_type *bank){
                 continue;
             }
         }
-        else if(option == "7"){
+        else if(option == "7"){ //exiting client
+            sem_close(sem_transfer);
+
             return;
         }
         else{
@@ -123,6 +158,19 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     int num_accounts = std::atoi(argv[1]);
+
+    // sem_unlink(SEM_ONE_FNAME); //removing semaphores to be sure it's not working right now
+    // sem_unlink(SEM_TWO_FNAME);
+    // sem_t *sem_one = sem_open(SEM_ONE_FNAME, IPC_CREAT, 0666, 1);
+    // if(sem_one == SEM_FAILED){
+    //     std::cout << "***ERROR, CAN'T CREATE SEMAPHORE***\n";
+    //     exit(EXIT_FAILURE);
+    // }
+    // sem_t *sem_two = sem_open(SEM_TWO_FNAME, IPC_CREAT, 0666, 1);
+    // if(sem_two == SEM_FAILED){
+    //     std::cout << "***ERROR, CAN'T CREATE SEMAPHORE***\n";
+    //     exit(EXIT_FAILURE);
+    // }
 
     key_t key = ftok("bank.h", 'R');
     if(key < 0){
@@ -145,6 +193,7 @@ int main(int argc, char* argv[]){
 
     struct_bank *bank = (bank_type*) memory; //creating object bank + attaching to shared segment
 
-    client(bank);    
+    client(bank);   
+    
 return 0;
 }

@@ -1,8 +1,8 @@
 all:
 	g++ initializer.cpp -o initializer
-	g++ client.cpp bank_options.cpp -o client
+	g++ client.cpp bank_options.cpp semaphore_names.cpp -o client
 	g++ deinitializer.cpp -o deinitializer
-
+	
 test_display_all:
 	./initializer 4 100 
 	./client 4 < test_files/display_all.txt

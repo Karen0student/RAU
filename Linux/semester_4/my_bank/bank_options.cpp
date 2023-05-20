@@ -1,5 +1,7 @@
 #include <iostream>
 #include "bank.h"
+#include <semaphore.h>
+#include <unistd.h> // for sleep function
 
 void display(const bank_type *bank, int account_num) {
     if(account_num >= bank->num_accounts){
@@ -71,7 +73,7 @@ void account_freeze(bank_type *bank, int account_num) {
     }
 }
 
-void transfer(bank_type *bank, int account1, int account2, int amount) {
+void transfer(bank_type *bank, int account1, int account2, int amount, sem_t *sem_transfer) {
     if(account1 >= bank->num_accounts || account2 >= bank->num_accounts) {
         std::cout << "***Invalid account number***\n";
         return;
@@ -89,11 +91,23 @@ void transfer(bank_type *bank, int account1, int account2, int amount) {
         std::cout << "***Invalud amount of transfer: balance > maximum balance***\n";
         return;
     }
-
+    int check_semaphore_value;
+    while(sem_getvalue(sem_transfer, &check_semaphore_value) != 2){
+        std::cout << "waiting...\n";
+        sleep(1);
+    }
+    for(int i = 0; i < 2; ++i){
+        sem_wait(sem_transfer);
+    }
     bank->accounts[account1].balance -= amount;
     bank->accounts[account2].balance += amount;
+    std::cout << "processing...\n";
+    sleep(3);
     //system("clear");
     std::cout << "Transferred: " << amount << "$ from account: "<< account1 << " to account: " << account2 << std::endl;
+    for(int i = 0; i < 2; ++i){
+        sem_post(sem_transfer);
+    }
 }
 
 void add_remove_money(bank_type *bank, int amount, int option){
