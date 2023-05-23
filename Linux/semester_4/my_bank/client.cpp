@@ -1,12 +1,12 @@
 #include <iostream>
-#include <sys/shm.h>
+#include <sys/ipc.h>
 #include <sys/sem.h>
+#include <sys/shm.h>
 #include "bank.h"
 #include <fcntl.h>           /* For O_* constants */
 #include <sys/stat.h>        /* For mode constants */
 #include <semaphore.h>
 #include <unistd.h> //for sleep function
-#include "semaphore_names.h"
 
 
 int check_given_account_number(bank_type *bank, int account_number){
@@ -36,24 +36,38 @@ int check_account_number(bank_type *bank){
     return std::stoi(account_number);
 }
 
+// union semun {
+//     int val;               /* used for SETVAL only */
+//     struct semid_ds *buf;  /* used for IPC_STAT and IPC_SET */
+//     ushort *array;         /* used for GETALL and SETALL */
+// };
 void client(bank_type *bank){
-    
-    // Create or open a named semaphore
-    // sem_unlink("/transfer");
-    // sem_unlink("/freeze_unfreeze");
-    sem_t* sem_transfer;
-    sem_transfer = sem_open(semaphoreNameTransfer, O_CREAT | O_EXCL, 0666, semaphoreInitialTransferValue); //from bank.h
-    if (sem_transfer == SEM_FAILED) {
-        std::cerr << "***Failed to create/open semaphore for transfer***\n";
+    //union semun arg;
+    struct sembuf sb_FreezeUnfreeze = {0, -1, 0};
+    key_t key_FreezeUnfreeze = ftok("bank.h", 'T');
+    if(key_FreezeUnfreeze == -1){   
+        perror("ftok");
+        exit(1); 
+    }
+    int semid_FreezeUnfreeze = semget(key_FreezeUnfreeze, 1, 0);
+    if(semid_FreezeUnfreeze == -1){
+        perror("semget client");
         exit(1);
     }
-    sem_t* sem_FreezeUnfreeze;
-    sem_FreezeUnfreeze = sem_open(semaphoreNameFreezeUnfreeze, O_CREAT | O_EXCL, 0666, semaphoreInitialFreezeUnfreezeValue); //from bank.h
-    if (sem_FreezeUnfreeze == SEM_FAILED) {
-        std::cerr << "***Failed to create/open semaphore for freeze and unfreeze***\n";
-        exit(1);
-    }
+    //std::cout << "semid_FreezeUnfreeze: " << semid_FreezeUnfreeze << std::endl;
 
+    if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){
+        perror("semop");
+        exit(1);
+    }
+    std::cout << "LOCKED\n";
+    sleep(3);
+    sb_FreezeUnfreeze.sem_op = 1;
+    if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){
+        perror("semop");
+        exit(1);
+    }    std::cout << "UNLOCKED\n";
+    
     while(true){
         std::cout << "\n1)display the current/minimum/maximum account balance\n";
         std::cout << "2)display all accounts\n";
@@ -77,16 +91,25 @@ void client(bank_type *bank){
         }
         else if(option == "3"){
             int account_number = check_account_number(bank);
-            int check_semaphore_value;
-            while(sem_getvalue(sem_FreezeUnfreeze, &check_semaphore_value) != 1){
-                std::cout << "waiting...\n";
-                sleep(1);
-            }
-            sem_wait(sem_FreezeUnfreeze);
-            account_freeze(bank, account_number);
+            // int check_semaphore_value;
+            // while(sem_getvalue(sem_FreezeUnfreeze, &check_semaphore_value) == 0){
+            //     std::cout << "value: " << sem_getvalue(sem_FreezeUnfreeze, &check_semaphore_value);
+            //     std::cout << " waiting...\n";
+            //     sleep(1);
+            // }
+            //sem_wait(sem_FreezeUnfreeze);
+            // if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){ //lock
+            //     perror("semop");
+            //     exit(1);
+            // }
             std::cout << "processing...\n";
             sleep(3);
-            sem_post(sem_FreezeUnfreeze);
+            account_freeze(bank, account_number, semid_FreezeUnfreeze, sb_FreezeUnfreeze);
+            // sb_FreezeUnfreeze.sem_op = 1;
+            // if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){ //release
+            //     perror("semop");
+            //     exit(1);
+            // }
             continue;
         }
         else if(option == "4"){
@@ -100,7 +123,7 @@ void client(bank_type *bank){
             std::cout << "Enter amount to transfer: ";
             int amount;
             std::cin >> amount;
-            transfer(bank, account_number1, account_number2, amount, sem_transfer);
+            transfer(bank, account_number1, account_number2, amount);
             continue;
         }
         else if(option == "5"){
@@ -139,8 +162,10 @@ void client(bank_type *bank){
             }
         }
         else if(option == "7"){ //exiting client
-            sem_close(sem_transfer);
-
+            //sem_close(sem_transfer);
+            //sem_destroy(sem_transfer);
+            //sem_close(sem_FreezeUnfreeze);
+            //sem_destroy(sem_FreezeUnfreeze);
             return;
         }
         else{

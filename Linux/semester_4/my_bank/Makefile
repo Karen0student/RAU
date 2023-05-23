@@ -1,7 +1,7 @@
 all:
-	g++ initializer.cpp -o initializer
-	g++ client.cpp bank_options.cpp semaphore_names.cpp -o client
-	g++ deinitializer.cpp -o deinitializer
+	g++ -Wall -Wextra initializer.cpp -o initializer
+	g++ -pthread client.cpp bank_options.cpp -o client
+	g++ -Wall -Wextra deinitializer.cpp -o deinitializer
 	
 test_display_all:
 	./initializer 4 100 

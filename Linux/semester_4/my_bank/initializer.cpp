@@ -1,6 +1,7 @@
 #include "bank.h"
 #include <iostream>
 #include <sys/shm.h>
+#include <sys/sem.h>
 
 bank_type *create_bank(int num_accounts, int max_balance){
     if(num_accounts <= 0){
@@ -55,7 +56,11 @@ bank_type *create_bank(int num_accounts, int max_balance){
     return bank;
 }
 
-
+union semun {
+    int val;               /* used for SETVAL only */
+    struct semid_ds *buf;  /* used for IPC_STAT and IPC_SET */
+    ushort *array;         /* used for GETALL and SETALL */
+};
 
 int main(int argc, char* argv[]){
     if(argc < 3){
@@ -67,6 +72,26 @@ int main(int argc, char* argv[]){
     max_balance = std::atoi(argv[2]);
     bank_type *bank = create_bank(num_accounts, max_balance);
     //std::cout <<  "1: " << bank->accounts[1].balance << std::endl; //checking
-
+    union semun arg;
+    key_t key_FreezeUnfreeze = ftok("bank.h", 'T');
+    if(key_FreezeUnfreeze == -1){
+        perror("ftok");
+        exit(1); 
+    }
+    //std::cout << "key_FREEZE: " << key_FreezeUnfreeze << std::endl;
+    int semid_FreezeUnfreeze = semget(key_FreezeUnfreeze, 1, 0666 | IPC_CREAT);
+    if(semid_FreezeUnfreeze == -1){
+        perror("semget initializer");
+        exit(1);
+    }
+    arg.val = 1;
+    //std::cout << "semid_FreezeUnfreeze: " << semid_FreezeUnfreeze << std::endl;
+    int value = semctl(semid_FreezeUnfreeze, 0, GETVAL);
+    //std::cout << "value of semaphore: " << value << std::endl;
+    if(semctl(semid_FreezeUnfreeze, 0, SETVAL, arg) == -1){
+        perror("semctl");
+        //semctl(semid_FreezeUnfreeze, 0, IPC_RMID);
+        exit(1);
+    }
     return 0;
 }
