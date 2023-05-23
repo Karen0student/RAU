@@ -58,7 +58,7 @@ void client(bank_type *bank){
     }
 
 //taking TRANSFER id
-    key_t key_sem_transfer = ftok("bank.h", 'F');
+    key_t key_sem_transfer = ftok("bank.h", 'T');
     if(key_sem_transfer == -1){   
         perror("ftok");
         exit(1); 
@@ -70,8 +70,8 @@ void client(bank_type *bank){
     }
 
 //taking MINIMUM BALANCE id
-    key_t key_sem_balance_min = ftok("bank.h", 'Min');
-    if(key_sem_transfer == -1){   
+    key_t key_sem_balance_min = ftok("bank.h", 'K');
+    if(key_sem_balance_min == -1){   
         perror("ftok");
         exit(1); 
     }
@@ -82,8 +82,8 @@ void client(bank_type *bank){
     }
 
 //taking MAXIMUM BALANCE id
-    key_t key_sem_balance_max = ftok("bank.h", 'Max');
-    if(key_sem_transfer == -1){   
+    key_t key_sem_balance_max = ftok("bank.h", 'S');
+    if(key_sem_balance_max == -1){   
         perror("ftok");
         exit(1); 
     }
@@ -93,6 +93,17 @@ void client(bank_type *bank){
         exit(1);
     }
 
+//taking add/remove money id
+    key_t key_sem_money = ftok("bank.h", 'M'); // Mny-> Money
+    if(key_sem_money == -1){   
+        perror("ftok");
+        exit(1); 
+    }
+    int semid_money = semget(key_sem_money, 1, 0);
+    if(semid_money == -1){
+        perror("semget client");
+        exit(1);
+    }
 
 //TESTING SEMAPHORE
     //std::cout << "semid: " << semid << std::endl;
@@ -172,7 +183,7 @@ void client(bank_type *bank){
             int amount;
             std::cout << "Enter amount of money: ";
             std::cin >> amount;
-            add_remove_money(bank, amount, option);
+            add_remove_money(bank, amount, option, semid_transfer, semid_freeze, semid_balance_min, semid_balance_max, semid_money, sb);
             continue;
         }
         else if(option == "6"){

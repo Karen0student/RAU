@@ -78,7 +78,7 @@ int main(){
     }
 
 
-    key_t key_sem_balance_min = ftok("bank.h", 'Min');
+    key_t key_sem_balance_min = ftok("bank.h", 'K');
     if(key_sem_balance_min == -1){   
         perror("ftok");
         exit(1);
@@ -94,7 +94,7 @@ int main(){
     }
 
 
-    key_t key_sem_balance_max = ftok("bank.h", 'Max');
+    key_t key_sem_balance_max = ftok("bank.h", 'S');
     if(key_sem_balance_max == -1){   
         perror("ftok");
         exit(1);
@@ -105,6 +105,22 @@ int main(){
         exit(1);
     }
     if(semctl(semid_balance_max, 0, IPC_RMID, arg) == -1){
+        perror("semctl");
+        exit(1); 
+    }
+
+
+    key_t key_sem_money = ftok("bank.h", 'M');
+    if(key_sem_money == -1){   
+        perror("ftok");
+        exit(1);
+    }
+    int semid_money = semget(key_sem_money, 1, 0);
+    if(semid_money == -1){
+        perror("semget deinitializer");
+        exit(1);
+    }
+    if(semctl(semid_money, 0, IPC_RMID, arg) == -1){
         perror("semctl");
         exit(1); 
     }

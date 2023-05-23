@@ -86,7 +86,7 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     arg.val = 1;
-    int value = semctl(semid_freeze, 0, GETVAL);
+    //int value = semctl(semid_freeze, 0, GETVAL);
     if(semctl(semid_freeze, 0, SETVAL, arg) == -1){
         perror("semctl");
         exit(1);
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]){
 
 
 //minimum balance semaphore
-    key_t key_sem_balance_min = ftok("bank.h", 'Min');
+    key_t key_sem_balance_min = ftok("bank.h", 'K');
     if(key_sem_balance_min == -1){
         perror("ftok");
         exit(1); 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]){
 
 
 //maximum balance semaphore
-    key_t key_sem_balance_max = ftok("bank.h", 'Max');
+    key_t key_sem_balance_max = ftok("bank.h", 'S');
     if(key_sem_balance_max == -1){
         perror("ftok");
         exit(1); 
@@ -147,6 +147,24 @@ int main(int argc, char* argv[]){
     }
     arg.val = 1;
     if(semctl(semid_balance_max, 0, SETVAL, arg) == -1){
+        perror("semctl");
+        exit(1);
+    }
+
+
+//add/remove money semaphore
+    key_t key_sem_money = ftok("bank.h", 'M');
+    if(key_sem_money == -1){
+        perror("ftok");
+        exit(1); 
+    }
+    int semid_money = semget(key_sem_money, 1, 0666 | IPC_CREAT);
+    if(semid_money == -1){
+        perror("semget initializer");
+        exit(1);
+    }
+    arg.val = 1;
+    if(semctl(semid_money, 0, SETVAL, arg) == -1){
         perror("semctl");
         exit(1);
     }
