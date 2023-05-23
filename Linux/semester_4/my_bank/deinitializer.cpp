@@ -34,23 +34,77 @@ union semun {
 int main(){
     destroy_bank();
     union semun arg;
-    key_t key_FreezeUnfreeze = ftok("bank.h", 'T');
-    if(key_FreezeUnfreeze == -1){   
+    key_t key_semFreeze = ftok("bank.h", 'F');
+    if(key_semFreeze == -1){   
         perror("ftok");
         exit(1);
     }
-    //std::cout << "key_FREEZE: " << key_FreezeUnfreeze << std::endl;
+    //std::cout << "key_FREEZE: " << key_sem << std::endl;
 
-    int semid_FreezeUnfreeze = semget(key_FreezeUnfreeze, 1, 0);
-    if(semid_FreezeUnfreeze == -1){
+    int semid_freeze = semget(key_semFreeze, 1, 0);
+    if(semid_freeze == -1){
         perror("semget deinitializer");
         exit(1);
     }
     //arg.val = 1;
-    //std::cout << "semid_FreezeUnfreeze: " << semid_FreezeUnfreeze << std::endl;
-    int value = semctl(semid_FreezeUnfreeze, 0, GETVAL);
+    //std::cout << "semid: " << semid << std::endl;
+    //int value = semctl(semid, 0, GETVAL);
     //std::cout << "value of semaphore: " << value << std::endl;
-    if(semctl(semid_FreezeUnfreeze, 0, IPC_RMID, arg) == -1){
+    if(semctl(semid_freeze, 0, IPC_RMID, arg) == -1){
+        perror("semctl");
+        exit(1); 
+    }
+
+
+    key_t key_sem_transfer = ftok("bank.h", 'T');
+    if(key_sem_transfer == -1){   
+        perror("ftok");
+        exit(1);
+    }
+    //std::cout << "key_FREEZE: " << key_sem << std::endl;
+
+    int semid_transfer = semget(key_sem_transfer, 1, 0);
+    if(semid_transfer == -1){
+        perror("semget deinitializer");
+        exit(1);
+    }
+    //arg.val = 1;
+    //std::cout << "semid: " << semid << std::endl;
+    //int value = semctl(semid_transfer, 0, GETVAL);
+    //std::cout << "value of semaphore: " << value << std::endl;
+    if(semctl(semid_transfer, 0, IPC_RMID, arg) == -1){
+        perror("semctl");
+        exit(1); 
+    }
+
+
+    key_t key_sem_balance_min = ftok("bank.h", 'Min');
+    if(key_sem_balance_min == -1){   
+        perror("ftok");
+        exit(1);
+    }
+    int semid_balance_min = semget(key_sem_balance_min, 1, 0);
+    if(semid_balance_min == -1){
+        perror("semget deinitializer");
+        exit(1);
+    }
+    if(semctl(semid_balance_min, 0, IPC_RMID, arg) == -1){
+        perror("semctl");
+        exit(1); 
+    }
+
+
+    key_t key_sem_balance_max = ftok("bank.h", 'Max');
+    if(key_sem_balance_max == -1){   
+        perror("ftok");
+        exit(1);
+    }
+    int semid_balance_max = semget(key_sem_balance_max, 1, 0);
+    if(semid_balance_max == -1){
+        perror("semget deinitializer");
+        exit(1);
+    }
+    if(semctl(semid_balance_max, 0, IPC_RMID, arg) == -1){
         perror("semctl");
         exit(1); 
     }

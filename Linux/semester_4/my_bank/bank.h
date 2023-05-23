@@ -28,9 +28,9 @@ bank_type *create_bank(int num_accounts, int max_balance);
 void client(bank_type *bank);
 void display(const bank_type *bank, int account_num);
 void display_all(const bank_type *bank);
-void account_freeze(bank_type *bank, int account_num, int semid_FreezeUnfreeze, struct sembuf &sb_FreezeUnfreeze);
-void transfer(bank_type *bank, int account1, int account2, int amount);
+void account_freeze(bank_type *bank, int account_num, int semid_freeze, struct sembuf &sb);
+void transfer(bank_type *bank, int account1, int account2, int amount, int semid_transfer, struct sembuf &sb);
 void add_remove_money(bank_type *bank, int amount, int option);
-void set_min_balance(bank_type *bank, int account_num, int min_balance);
-void set_max_balance(bank_type *bank, int account_num, int max_balance);
+void set_min_balance(bank_type *bank, int account_num, int min_balance, int semid_balance_min, struct sembuf &sb);
+void set_max_balance(bank_type *bank, int account_num, int max_balance, int semid_balance_max, struct sembuf &sb);
 #endif

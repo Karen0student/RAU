@@ -43,30 +43,70 @@ int check_account_number(bank_type *bank){
 // };
 void client(bank_type *bank){
     //union semun arg;
-    struct sembuf sb_FreezeUnfreeze = {0, -1, 0};
-    key_t key_FreezeUnfreeze = ftok("bank.h", 'T');
-    if(key_FreezeUnfreeze == -1){   
+    struct sembuf sb = {0, -1, 0};
+
+//taking FREEZE id
+    key_t key_semFreeze = ftok("bank.h", 'F');
+    if(key_semFreeze == -1){   
         perror("ftok");
         exit(1); 
     }
-    int semid_FreezeUnfreeze = semget(key_FreezeUnfreeze, 1, 0);
-    if(semid_FreezeUnfreeze == -1){
+    int semid_freeze = semget(key_semFreeze, 1, 0);
+    if(semid_freeze == -1){
         perror("semget client");
         exit(1);
     }
-    //std::cout << "semid_FreezeUnfreeze: " << semid_FreezeUnfreeze << std::endl;
 
-    if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){
-        perror("semop");
+//taking TRANSFER id
+    key_t key_sem_transfer = ftok("bank.h", 'F');
+    if(key_sem_transfer == -1){   
+        perror("ftok");
+        exit(1); 
+    }
+    int semid_transfer = semget(key_sem_transfer, 1, 0);
+    if(semid_transfer == -1){
+        perror("semget client");
         exit(1);
     }
-    std::cout << "LOCKED\n";
-    sleep(3);
-    sb_FreezeUnfreeze.sem_op = 1;
-    if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){
-        perror("semop");
+
+//taking MINIMUM BALANCE id
+    key_t key_sem_balance_min = ftok("bank.h", 'Min');
+    if(key_sem_transfer == -1){   
+        perror("ftok");
+        exit(1); 
+    }
+    int semid_balance_min = semget(key_sem_balance_min, 1, 0);
+    if(semid_balance_min == -1){
+        perror("semget client");
         exit(1);
-    }    std::cout << "UNLOCKED\n";
+    }
+
+//taking MAXIMUM BALANCE id
+    key_t key_sem_balance_max = ftok("bank.h", 'Max');
+    if(key_sem_transfer == -1){   
+        perror("ftok");
+        exit(1); 
+    }
+    int semid_balance_max = semget(key_sem_balance_max, 1, 0);
+    if(semid_balance_max == -1){
+        perror("semget client");
+        exit(1);
+    }
+
+
+//TESTING SEMAPHORE
+    //std::cout << "semid: " << semid << std::endl;
+    // if(semop(semid, &sb, 1) == -1){
+    //     perror("semop");
+    //     exit(1);
+    // }
+    // std::cout << "LOCKED\n";
+    // sleep(3);
+    // sb.sem_op = 1;
+    // if(semop(semid, &sb, 1) == -1){
+    //     perror("semop");
+    //     exit(1);
+    // }    std::cout << "UNLOCKED\n";
     
     while(true){
         std::cout << "\n1)display the current/minimum/maximum account balance\n";
@@ -98,15 +138,14 @@ void client(bank_type *bank){
             //     sleep(1);
             // }
             //sem_wait(sem_FreezeUnfreeze);
-            // if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){ //lock
+            // if(semop(semid, &sb, 1) == -1){ //lock
             //     perror("semop");
             //     exit(1);
             // }
-            std::cout << "processing...\n";
-            sleep(3);
-            account_freeze(bank, account_number, semid_FreezeUnfreeze, sb_FreezeUnfreeze);
-            // sb_FreezeUnfreeze.sem_op = 1;
-            // if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){ //release
+            std::cout << "wait...\n";
+            account_freeze(bank, account_number, semid_freeze, sb);
+            // sb.sem_op = 1;
+            // if(semop(semid, &sb, 1) == -1){ //release
             //     perror("semop");
             //     exit(1);
             // }
@@ -123,7 +162,7 @@ void client(bank_type *bank){
             std::cout << "Enter amount to transfer: ";
             int amount;
             std::cin >> amount;
-            transfer(bank, account_number1, account_number2, amount);
+            transfer(bank, account_number1, account_number2, amount, semid_transfer, sb);
             continue;
         }
         else if(option == "5"){
@@ -147,7 +186,7 @@ void client(bank_type *bank){
                 std::cout << "Enter new maximum balance: ";
                 int maximum_balance;
                 std::cin >> maximum_balance;
-                set_max_balance(bank, account_number, maximum_balance);
+                set_max_balance(bank, account_number, maximum_balance, semid_balance_max, sb);
                 continue;
             }
             if(option == 2){
@@ -157,15 +196,11 @@ void client(bank_type *bank){
                 std::cout << "Enter new minimum balance: ";
                 int minimum_balance;
                 std::cin >> minimum_balance;
-                set_min_balance(bank, account_number, minimum_balance);
+                set_min_balance(bank, account_number, minimum_balance, semid_balance_min, sb);
                 continue;
             }
         }
         else if(option == "7"){ //exiting client
-            //sem_close(sem_transfer);
-            //sem_destroy(sem_transfer);
-            //sem_close(sem_FreezeUnfreeze);
-            //sem_destroy(sem_FreezeUnfreeze);
             return;
         }
         else{

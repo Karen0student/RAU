@@ -33,14 +33,14 @@ void display_all(const bank_type *bank) {
     }
 }
 
-void account_freeze(bank_type *bank, int account_num, int semid_FreezeUnfreeze, struct sembuf &sb_FreezeUnfreeze) {
+void account_freeze(bank_type *bank, int account_num, int semid_freeze, struct sembuf &sb) {
     if (account_num >= bank->num_accounts) {
         std::cout << "***Invalid account number***\n";
         return;
     }
     //sem_wait(sem_FreezeUnfreeze);
-    sb_FreezeUnfreeze.sem_op = -1;
-    if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){ //lock
+    sb.sem_op = -1;
+    if(semop(semid_freeze, &sb, 1) == -1){ //lock
         perror("semop client");
         exit(1);
     }    
@@ -55,6 +55,8 @@ void account_freeze(bank_type *bank, int account_num, int semid_FreezeUnfreeze, 
                 std::cout << "*Account already frozen*\n";
                 break;
             }
+            std::cout << "proccessing...\n";
+            sleep(3);
             bank->accounts[account_num].frozen = true;
             //system("clear");
             std::cout << "*Account has been frozen*\n";
@@ -67,6 +69,8 @@ void account_freeze(bank_type *bank, int account_num, int semid_FreezeUnfreeze, 
                 std::cout << "*Account already unfrozen*\n";
                 break;
             }
+            std::cout << "proccessing...\n";
+            sleep(3);
             bank->accounts[account_num].frozen = false;
             //system("clear");
             std::cout << "*Account has been unfrozen*\n";
@@ -79,14 +83,14 @@ void account_freeze(bank_type *bank, int account_num, int semid_FreezeUnfreeze, 
         break;
     }
     //sem_post(sem_FreezeUnfreeze);
-    sb_FreezeUnfreeze.sem_op = 1;
-    if(semop(semid_FreezeUnfreeze, &sb_FreezeUnfreeze, 1) == -1){ //release
+    sb.sem_op = 1;
+    if(semop(semid_freeze, &sb, 1) == -1){ //release
         perror("semop client");
         exit(1);
     }  
 }
 
-void transfer(bank_type *bank, int account1, int account2, int amount) {
+void transfer(bank_type *bank, int account1, int account2, int amount, int semid_transfer, struct sembuf &sb) {
     if(account1 >= bank->num_accounts || account2 >= bank->num_accounts) {
         std::cout << "***Invalid account number***\n";
         return;
@@ -104,7 +108,7 @@ void transfer(bank_type *bank, int account1, int account2, int amount) {
         std::cout << "***Invalud amount of transfer: balance > maximum balance***\n";
         return;
     }
-    int check_semaphore_value;
+    // int check_semaphore_value;
     // while(sem_getvalue(sem_transfer, &check_semaphore_value) != 2){
     //     std::cout << "waiting...\n";
     //     sleep(1);
@@ -112,15 +116,26 @@ void transfer(bank_type *bank, int account1, int account2, int amount) {
     // for(int i = 0; i < 2; ++i){
     //     sem_wait(sem_transfer);
     // }
+    sb.sem_op = -1;
+    std::cout << "wait...\n";
+    if(semop(semid_transfer, &sb, 1) == -1){ //lock
+        perror("semop client");
+        exit(1);
+    }
+    std::cout << "processing...\n";
     bank->accounts[account1].balance -= amount;
     bank->accounts[account2].balance += amount;
-    std::cout << "processing...\n";
     sleep(3);
     //system("clear");
     std::cout << "Transferred: " << amount << "$ from account: "<< account1 << " to account: " << account2 << std::endl;
     // for(int i = 0; i < 2; ++i){
     //     sem_post(sem_transfer);
     // }
+    sb.sem_op = 1;
+    if(semop(semid_transfer, &sb, 1) == -1){ //release
+        perror("semop client");
+        exit(1);
+    }
 }
 
 void add_remove_money(bank_type *bank, int amount, int option){
@@ -163,7 +178,7 @@ void add_remove_money(bank_type *bank, int amount, int option){
     }
 }
 
-void set_min_balance(bank_type *bank, int account_num, int min_balance) {
+void set_min_balance(bank_type *bank, int account_num, int min_balance, int semid_balance_min, struct sembuf &sb) {
     if(account_num >= bank->num_accounts){
         std::cout << "***Invalid account number***\n";
         return;
@@ -172,13 +187,26 @@ void set_min_balance(bank_type *bank, int account_num, int min_balance) {
         std::cout << "***FAILED: balance is less than new minimum balance***\n";
         return;
     }
+    sb.sem_op = -1;
+    std::cout << "wait...\n";
+    if(semop(semid_balance_min, &sb, 1) == -1){ //lock
+        perror("semop client");
+        exit(1);
+    }
+    std::cout << "processing...\n";
     bank->accounts[account_num].min_balance = min_balance;
+    sleep(3);
+    sb.sem_op = 1;
+    if(semop(semid_balance_min, &sb, 1) == -1){ //release
+        perror("semop client");
+        exit(1);
+    }
     //system("clear");
     std::cout << "**MINIMUM BALANCE SET SUCCESSFULLY**\n";
     return;
 }
 
-void set_max_balance(bank_type *bank, int account_num, int max_balance) {
+void set_max_balance(bank_type *bank, int account_num, int max_balance, int semid_balance_max, struct sembuf &sb) {
     if(account_num >= bank->num_accounts){
         std::cout << "***Invalid account number***\n";
         return;
@@ -186,8 +214,20 @@ void set_max_balance(bank_type *bank, int account_num, int max_balance) {
     if(bank->accounts[account_num].balance > max_balance){
         std::cout << "***FAILED: balance is more than new minimum balance***\n";
         return;
+    }sb.sem_op = -1;
+    std::cout << "wait...\n";
+    if(semop(semid_balance_max, &sb, 1) == -1){ //lock
+        perror("semop client");
+        exit(1);
     }
+    std::cout << "processing...\n";
     bank->accounts[account_num].max_balance = max_balance;
+    sleep(3);
+    sb.sem_op = 1;
+    if(semop(semid_balance_max, &sb, 1) == -1){ //release
+        perror("semop client");
+        exit(1);
+    }
     //system("clear");
     std::cout << "**MAXIMUM BALANCE SET SUCCESSFULLY**\n";
     return;
