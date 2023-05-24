@@ -168,5 +168,6 @@ int main(int argc, char* argv[]){
         perror("semctl");
         exit(1);
     }
+    std::cout << "*****INITIALIZED SUCCESSFULLY*****\n";
     return 0;
 }

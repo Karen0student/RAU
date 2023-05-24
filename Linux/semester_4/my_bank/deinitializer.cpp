@@ -21,7 +21,6 @@ void *destroy_bank(){
         return NULL;
     }
 
-    std::cout << "MEMORY DELETED SUCCESSFULLY\n";
     return NULL;
 }
 
@@ -124,5 +123,6 @@ int main(){
         perror("semctl");
         exit(1); 
     }
-    exit(0);
+    std::cout << "*****MEMORY DELETED SUCCESSFULLY*****\n";
+    return 0;
 }

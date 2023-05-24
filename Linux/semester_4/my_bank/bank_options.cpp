@@ -40,6 +40,7 @@ void account_freeze(bank_type *bank, int account_num, int &semid_freeze, struct 
     }
     //sem_wait(sem_FreezeUnfreeze);
     sb.sem_op = -1;
+    std::cout << "wait...\n";
     if(semop(semid_freeze, &sb, 1) == -1){ //lock
         perror("semop client");
         exit(1);
@@ -123,9 +124,9 @@ void transfer(bank_type *bank, int account1, int account2, int amount, int &semi
         exit(1);
     }
     std::cout << "processing...\n";
+    sleep(5);
     bank->accounts[account1].balance -= amount;
     bank->accounts[account2].balance += amount;
-    sleep(5);
     //system("clear");
     std::cout << "Transferred: " << amount << "$ from account: "<< account1 << " to account: " << account2 << std::endl;
     // for(int i = 0; i < 2; ++i){
@@ -143,6 +144,7 @@ void add_remove_money(bank_type *bank, int amount, int option, int &semid_transf
         std::cout <<"***Invalid amount***\n";
         return;
     }
+    std::cout << "wait...\n";
     sb.sem_op = -1;
     if(semop(semid_freeze, &sb, 1) == -1){ //lock
         perror("semop client");
@@ -177,6 +179,7 @@ void add_remove_money(bank_type *bank, int amount, int option, int &semid_transf
 
     if(option == 1){
         //system("clear");
+        std::cout << "processing...\n";
         for(int i = 0; i < bank->num_accounts; ++i){
             if(bank->accounts[i].frozen == true){
                 std::cout << "*account: " << i << " frozen, SKIPPING*\n";
@@ -224,6 +227,7 @@ void add_remove_money(bank_type *bank, int amount, int option, int &semid_transf
     }
     else if(option == 2){
         //system("clear");
+        std::cout << "processing...\n";
         for(int i = 0; i < bank->num_accounts; ++i){
             if(bank->accounts[i].frozen == true){
                 std::cout << "*account: " << i << " frozen, SKIPPING*\n";
