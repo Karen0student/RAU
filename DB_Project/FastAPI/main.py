@@ -10,7 +10,7 @@ app = FastAPI()
 
 @app.post("/create")
 async def create_todo(id : int, text: str, is_complete: bool = False):
-    todo = _models.Todo(id=id, text=text, is_done=is_complete)
+    todo = _models.actor(id=id, text=text, is_done=is_complete)
     _session.add(todo)
     _session.commit()
     return {"todo added": todo.text}
@@ -18,14 +18,14 @@ async def create_todo(id : int, text: str, is_complete: bool = False):
 
 @app.get("/")
 async def get_all_todos():
-    todos_query = _session.query(_models.Todo)
+    todos_query = _session.query(_models.actor)
     return todos_query.all()
 
 
 @app.get("/done")
 async def list_done_todos():
-    todos_query = _session.query(_models.Todo)
-    done_todos_query = todos_query.filter(_models.Todo.is_done==True)
+    todos_query = _session.query(_models.actor)
+    done_todos_query = todos_query.filter(_models.actor.is_done==True)
     return done_todos_query.all()
 
 
@@ -36,7 +36,7 @@ async def update_todo(
     is_complete: bool = False
 ):
     
-    todo_query = _session.query(_models.Todo).filter(_models.Todo.id==id)
+    todo_query = _session.query(_models.actor).filter(_models.actor.id==id)
     todo = todo_query.first()
     if new_text:
         todo.text = new_text
@@ -47,7 +47,7 @@ async def update_todo(
 
 @app.delete("/delete/{id}")
 async def delete_todo(id: int):
-    todo = _session.query(_models.Todo).filter(_models.Todo.id==id).first() # Todo object
+    todo = _session.query(_models.actor).filter(_models.actor.id==id).first() # actor object
     _session.delete(todo)
     _session.commit()
     return {"todo deleted": todo.text, "ID": id}
