@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 url = URL.create(
-    drivername="postgres",
+    drivername="postgresql",
     username="admin",
     password="secret",
     host="localhost",

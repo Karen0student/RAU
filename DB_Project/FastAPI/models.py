@@ -5,13 +5,11 @@ import session as _session
 Base = declarative_base()
 
 class Todo(Base):
-    __tablename__ = "actor"
+    __tablename__ = "todos"
 
     id = Column(Integer, primary_key=True)
-    # models.ForeignKey("app.Model", verbose_name=_(""), on_delete=models.CASCADE)
     text = Column(String)
     is_done = Column(Boolean, default=False)
-    
 
 
 Base.metadata.create_all(_session.engine)
