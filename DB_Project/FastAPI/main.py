@@ -8,7 +8,7 @@ app = FastAPI()
 # def home():
 #     return {"message": "First FastAPI app"}
 
-@app.post("/create")
+@app.post("/create_actor")
 async def create_todo(id : int, text: str, is_complete: bool = False):
     todo = _models.actor(id=id, text=text, is_done=is_complete)
     _session.add(todo)
