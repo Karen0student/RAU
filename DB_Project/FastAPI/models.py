@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Date
 from sqlalchemy.orm import declarative_base # , relationship, backref
-import session as _session
+# import FastAPI.session as _session
 # from datetime import datetime, date
 import subprocess
 
@@ -10,7 +10,7 @@ class actor(Base):
     __tablename__ = "actor"
 
     id = Column(Integer, primary_key=True, nullable=False)
-    Name_Surname = Column(String(50), nullable=False)
+    Name_Surname = Column(String(50), nullable=False, index=True) # to find faster, EATING RAM
     rank = Column(String(20), nullable=True)
     age = Column(Integer, nullable=False)
     gender = Column(String(10), nullable=True)
@@ -38,7 +38,7 @@ class role(Base):
     gender = Column(String(10), nullable=True)
     
     
-Base.metadata.create_all(_session.engine)
+# Base.metadata.create_all(_session.engine)
 
 # # ADDING VALUES INTO TABLES
 # with open("/home/voyager/Visual_Studio/DB_Project/FastAPI/insert_values_into_db.py", 'r') as input_file:
