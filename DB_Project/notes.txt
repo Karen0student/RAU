@@ -1,0 +1,7 @@
+# FOR ALEMBIC
+1) alembic init migration
+2) modify alembic.init
+3) create models for alembic
+4) alembic revision --autogenerate -m "<name for generated file in migration/versions>"
+5) repeat step 4
+6) add column in new .py folder from step 5

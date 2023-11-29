@@ -1,7 +1,7 @@
 import models as _models
 from session import session as _session
 import psycopg2
-from psycopg2 import sql
+# from psycopg2 import sql
 #import main as _main
 # from main import _models
 # from main import _session
@@ -51,7 +51,7 @@ with open("/home/voyager/Visual_Studio/DB_Project/postgres/backup/actress_insert
         data = line.split()
         check_value = int(data[0])
         if check_value in ID_list: 
-            print(f"id: {check_value} Already in use")
+            # print(f"id: {check_value} Already in use")
             continue
         else:
             object = _models.actor(id = int(data[0]), Name_Surname = data[1] + ' ' + data[2],
@@ -73,7 +73,7 @@ with open("/home/voyager/Visual_Studio/DB_Project/postgres/backup/postanovka_ins
         data = line.split()
         check_value = int(data[0])
         if check_value in ID_list: 
-            print(f"id: {check_value} Already in use")
+            # print(f"id: {check_value} Already in use")
             continue
         else:
             object = _models.postanovka(id = int(data[0]), start_role = data[1], 
@@ -95,7 +95,7 @@ with open("/home/voyager/Visual_Studio/DB_Project/postgres/backup/role_insert_va
         data = line.split()
         check_value = int(data[0])
         if check_value in ID_list: 
-            print(f"id: {check_value} Already in use")
+            # print(f"id: {check_value} Already in use")
             continue
         else:
             object = _models.role(id = data[0], name = data[1], ampula = data[2], piesa = data[3], gender = data[4])
