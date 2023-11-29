@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from session import session as _session
 import models as _models
 from requests import HTTPError
-from sqlalchemy import DateTime
-from datetime import datetime
+# from sqlalchemy import DateTime, Date
+from datetime import date, datetime
 from insert_values_into_db import ID_list
-
+# from pydantic import date
 app = FastAPI()
 
 # ACTOR
@@ -79,16 +79,15 @@ async def actor_delete(id: int):
         return f"ID: {id} Referenced so can't be deleted"
 
     return HTTPError
-    
-    
-    
-    
+
+
+
 # POSTANOVKA
-@app.post("/create_postanovka", tags=["postanovka"], response_model=None)
-async def create_postanovka(id : int, group_number: int = 0, start_role: DateTime = datetime.now(), stop_role: DateTime = datetime.now(), role_type: str = "",
-                            director: str = "", date_of: DateTime = datetime.now()): # sort names how you want, there is no difference, it's for front-end, we don't giva a s#it about front
+@app.post("/create_postanovka", tags=["postanovka"])
+async def create_postanovka(id : int, start_role: date = datetime.now().strftime("%Y-%m-%d"), stop_role: date = datetime.now().strftime("%Y-%m-%d"), date_of: date = datetime.now().strftime("%Y-%m-%d"),
+                            group_number: int = 0, role_type: str = "", director: str = ""): # sort names how you want, there is no difference, it's for front-end, we don't giva a s#it about front
     object = _models.postanovka(id=id, start_role=start_role, stop_role=stop_role, role_type=role_type, group_number=group_number, 
-                         director=director, date_of=date_of)
+                         director=director, date_of=date_of) 
     _session.add(object)
     _session.commit()
     if role_type:
@@ -106,11 +105,11 @@ async def get_all_postanovka():
 async def postanovka_update(
     id: int,
     new_group_number: int = 0,
-    new_start_role: DateTime = datetime.now,
-    new_stop_role: DateTime = datetime.now,
+    new_start_role: date = datetime.now(),
+    new_stop_role: date = datetime.now(),
     new_role_type: str = "",
     new_director: str = "",
-    new_date_of: DateTime = datetime.now
+    new_date_of: date = datetime.now()
 ):
     
     postanovka_object = _session.query(_models.postanovka).filter(_models.postanovka.id==id).first()
