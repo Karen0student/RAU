@@ -1,4 +1,4 @@
-"""adding values
+"""adding column
 
 Revision ID: a48dfc6ff137
 Revises: 32d49c5ee830

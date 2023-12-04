@@ -5,6 +5,7 @@ from requests import HTTPError
 # from sqlalchemy import DateTime
 from datetime import datetime, date
 from insert_values_into_db import ID_list
+from fastapi import Query
 
 app = FastAPI()
 
@@ -20,9 +21,9 @@ async def create_actor(actor_id : int, Name_Surname: str, age: int, rank: str = 
     return f"actor added: {object.Name_Surname}"
 
 
-@app.get("/get_actor", tags=["actor"])
-async def get_all_actors():
-    actors_query = _session.query(_models.actor)
+@app.get("/get actor", tags=["actor"])
+async def get_all_actors(skip : int = Query(0, ge=0), limit: int = Query(10)):
+    actors_query = _session.query(_models.actor).offset(skip).limit(limit)
     return actors_query.all()
 
 
@@ -97,8 +98,8 @@ async def create_postanovka(id : int, start_role: date = datetime.now().strftime
         return f"postanovka added: ID = {object.id}"
 
 @app.get("/get_postanovka", tags=["postanovka"])
-async def get_all_postanovka():
-    postanovka_query = _session.query(_models.postanovka)
+async def get_all_postanovka(skip : int = Query(0, ge=0), limit: int = Query(10)):
+    postanovka_query = _session.query(_models.postanovka).offset(skip).limit(limit)
     return postanovka_query.all()
 
 
@@ -164,9 +165,9 @@ async def create_role(role_id : int, name: str = "", ampula: str = "", piesa: st
         return f"role added: ID = {object.id}"
     
 
-@app.get("/get_role", tags=["role"])
-async def get_all_roles():
-    role_query = _session.query(_models.role)
+@app.get("/get role", tags=["role"])
+async def get_all_roles(skip : int = Query(0, ge=0), limit: int = Query(10)):
+    role_query = _session.query(_models.role).offset(skip).limit(limit)
     return role_query.all()
 
 
@@ -216,7 +217,7 @@ async def role_delete(role_id: int):
 # VALUE GENERATORS
 
 # ACTOR
-@app.post("/generate_actor_values", tags=["actor"])
+@app.post("/generate actor values", tags=["actor"])
 async def generate_actor_values(quantity_actor: int):
     actor_list = []
     index = 1
@@ -244,7 +245,7 @@ async def generate_actor_values(quantity_actor: int):
 
 
 # POSTANOVKA
-@app.post("/generate_postanovka_values", tags=["postanovka"])
+@app.post("/generate postanovka values", tags=["postanovka"])
 async def generate_postanovka_values(quantity_postanovka: int):
     postanovka_list = []
     index = 1
@@ -274,7 +275,7 @@ async def generate_postanovka_values(quantity_postanovka: int):
 
 
 # ROLE
-@app.post("/generate_role_values", tags=["role"])
+@app.post("/generate role values", tags=["role"])
 async def generate_role_values(quantity_role: int):
     role_list = []
     index = 1
@@ -294,3 +295,71 @@ async def generate_role_values(quantity_role: int):
         _session.commit()
     else:
         print("ROLE: NO VALUE ADDED")
+        
+
+
+
+        
+# GROUP
+# from sqlalchemy import func # it's for counting something from table # func.count(<raw of table>)
+
+@app.get("/actors count by age group", tags=["unique commands"])
+async def get_actors_count_by_age_group():
+    actors_count_query = (
+        _session.query(_models.actor.gender, _models.actor.Name_Surname)
+        .group_by(_models.actor.gender, _models.actor.Name_Surname).all())
+    return [{"gender": gender, "Name_Surname": Name_Surname} for gender, Name_Surname in actors_count_query]
+
+
+
+# JOIN
+
+@app.get("/actors and roles join", tags=["unique commands"])
+async def get_actors_and_roles():
+    actors_roles_query = _session.query(_models.actor).join(
+        _models.role, _models.actor.gender == _models.role.gender)
+    return actors_roles_query.all()
+
+
+# SELECT WHERE
+
+
+@app.get("/Select from actors where", tags=["unique commands"])
+async def get_actors_by_conditions(
+    age: int = Query(..., description="Filter actors by age"),
+    gender: str = Query(..., description="Filter actors by gender"),
+):
+    actors_query = _session.query(_models.actor).filter(
+        (_models.actor.age == age) & (_models.actor.gender == gender))
+    return actors_query.all()
+
+
+# SORT (order by)
+
+@app.get("/actors sorted by age", tags=["unique commands"])
+async def get_actors_sorted_by_age(
+    sort_order: str = Query(..., description="Sort order (asc/desc)")
+):
+    sort_column = _models.actor.age
+    if sort_order.lower() == "desc":
+        sort_column = sort_column.desc()
+
+    actors_query = _session.query(_models.actor).order_by(sort_column)
+    return actors_query.all()
+
+
+# # UPDATE
+
+# @app.put("/update actors rank")
+# async def update_actors_rank(
+#     min_age: int = Query(..., description="Minimum age for the condition"),
+#     max_age: int = Query(..., description="Maximum age for the condition"),
+#     new_rank: str = Query(..., description="New rank for the selected actors"),
+# ):
+#     update_query = (
+#         _session.query(_models.Actor)
+#         .filter((_models.Actor.age >= min_age) & (_models.Actor.age <= max_age))
+#         .update({"rank": new_rank}, synchronize_session=False)
+#     )
+#     _session.commit()
+#     return f"{update_query} actors updated with new rank."
