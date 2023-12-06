@@ -15,8 +15,7 @@ app = FastAPI()
 @app.post("/create_actor", tags=["actor"])
 async def create_actor(actor_id : int, Name_Surname: str, age: int, rank: str = "", gender: str = "", 
                       ampula: str = ""): # sort names how you want, there is no difference, it's for front-end, we don't giva a s#it about front
-    check_actor_id = _session.query(_models.actor).filter(_models.actor.id==actor_id).first()
-    if check_actor_id is None:
+    if _session.query(_models.actor).filter(_models.actor.id==actor_id).first() is None:
         object = _models.actor(id=actor_id, Name_Surname=Name_Surname, rank=rank, age=age, gender=gender, 
                             ampula=ampula)
         _session.add(object)
