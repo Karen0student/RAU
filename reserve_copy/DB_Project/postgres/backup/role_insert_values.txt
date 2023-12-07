@@ -1,3 +1,0 @@
-1 doctor assistant symphony_7 male
-2 hacker assassin symphony_2 male
-3 sniper mother_christmas symphony_3 female

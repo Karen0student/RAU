@@ -1,3 +1,0 @@
-1 John Smith marshal 45 male doctor
-2 Anderson Smith general 28 male hacker
-3 Ekaterina Orduxanyan sergant 25 female sniper
