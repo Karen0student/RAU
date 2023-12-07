@@ -1,11 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from session import session as _session
 import models as _models
-# from requests import HTTPError
-# from werkzeug.exceptions import HTTPException
-# from sqlalchemy import DateTime
 from datetime import datetime, date
-# from insert_values_into_db import ID_list
 from fastapi import Query
 
 app = FastAPI()
@@ -15,7 +11,8 @@ app = FastAPI()
 @app.post("/create_actor", tags=["actor"])
 async def create_actor(actor_id : int, Name_Surname: str, age: int, rank: str = "", gender: str = "", 
                       ampula: str = ""): # sort names how you want, there is no difference, it's for front-end, we don't giva a s#it about front
-    if _session.query(_models.actor).filter(_models.actor.id==actor_id).first() is None:
+    check_actor_id = _session.query(_models.actor).filter(_models.actor.id==actor_id).first()
+    if check_actor_id is None:
         object = _models.actor(id=actor_id, Name_Surname=Name_Surname, rank=rank, age=age, gender=gender, 
                             ampula=ampula)
         _session.add(object)
@@ -31,13 +28,6 @@ async def get_all_actors(skip : int = Query(0, ge=0), limit: int = Query(100)):
     return actors_query.all()
 
 
-# @app.get("/done") # SELECT EXAMPLE
-# async def list_done_todos():
-#     todos_query = _session.query(_models.actor)
-#     done_todos_query = todos_query.filter(_models.actor.is_done==True)
-#     return done_todos_query.all()
-
-
 @app.put("/update/{actor_id}", tags=["actor"])
 async def actor_update(
     actor_id: int,
@@ -51,9 +41,7 @@ async def actor_update(
     actor_object = _session.query(_models.actor).filter(_models.actor.id==actor_id).first()
     if actor_object is None:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Such ID")
-    # if actor_object.id != id: # check if actor_object is not None
-    #     print(f"id: {id} is not in use")
-    #     return HTTPError
+
     if new_Name_Surname:
         actor_object.Name_Surname = new_Name_Surname
     if new_rank:
@@ -124,11 +112,7 @@ async def postanovka_update(
     postanovka_object = _session.query(_models.postanovka).filter(_models.postanovka.id==postanovka_id).first()
     if postanovka_object is None:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Such ID")
-    # if actor_object.id != id: # check if actor_object is not None
-    #     print(f"id: {id} is not in use")
-    #     return HTTPError     
-    # if postanovka_object.id in ID_list:
-    #     return f"ID: {id} is in use"
+
     if new_group_number:
         postanovka_object.group_number = new_group_number
     if new_start_role:
@@ -148,7 +132,7 @@ async def postanovka_update(
 
 @app.delete("/delete_postanovka/{postanovka_id}", tags=["postanovka"])
 async def postanovka_delete(postanovka_id: int):
-    postanovka_object = _session.query(_models.postanovka).filter(_models.postanovka.id==postanovka_id).first() # actor object
+    postanovka_object = _session.query(_models.postanovka).filter(_models.postanovka.id==postanovka_id).first()
     if postanovka_object is not None:
         _session.delete(postanovka_object)
         _session.commit()
@@ -159,9 +143,8 @@ async def postanovka_delete(postanovka_id: int):
 
 
 # ROLE
-
 @app.post("/create_role", tags=["role"])
-async def create_role(role_id : int, name: str = "", ampula: str = "", piesa: str = "", gender: str = ""): # sort names how you want, there is no difference, it's for front-end, we don't giva a s#it about front
+async def create_role(role_id : int, name: str = "", ampula: str = "", piesa: str = "", gender: str = ""):
     check_role_id_first = _session.query(_models.actor).filter(_models.actor.id == role_id).first()
     if check_role_id_first is not None:
         check_role_id_second = _session.query(_models.role).filter(_models.role.id == role_id).first()
@@ -195,11 +178,7 @@ async def role_update(
     role_object = _session.query(_models.role).filter(_models.role.id==role_id).first()
     if role_object is None:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Such ID")
-    # if actor_object.id != id: # check if actor_object is not None
-    #     print(f"id: {id} is not in use")
-    #     return HTTPError    
-    # if role_object.id in imported_ID_List:
-    #     return f"ID: {role_id} is in use"
+
     if new_name:
         role_object.name = new_name
     if new_ampula:
@@ -215,7 +194,7 @@ async def role_update(
 
 @app.delete("/delete_role/{role_id}", tags=["role"])
 async def role_delete(role_id: int):
-    role_object = _session.query(_models.role).filter(_models.role.id==role_id).first() # actor object
+    role_object = _session.query(_models.role).filter(_models.role.id==role_id).first()
     if role_object is not None:
         _session.delete(role_object)
         _session.commit()
@@ -233,7 +212,7 @@ async def generate_actor_values(quantity_actor: int):
     flag_of_commition = False
     index = 1
     age = 25
-    while index != quantity_actor:
+    while index != quantity_actor + 1:
         if _session.query(_models.actor).filter(_models.actor.id==index).first() is not None:
             index += 1
             quantity_actor += 1
@@ -265,7 +244,7 @@ async def generate_postanovka_values(quantity_postanovka: int):
     stop_role = '2022/10/05'
     group_number = 1
     date_of = '2022/10/05'
-    while index != quantity_postanovka:
+    while index != quantity_postanovka + 1:
         if _session.query(_models.actor).filter(_models.actor.id==index).first() is not None:        
             if _session.query(_models.postanovka).filter(_models.postanovka.id==index).first() is not None:
                 index += 1
@@ -294,7 +273,7 @@ async def generate_postanovka_values(quantity_postanovka: int):
 async def generate_role_values(quantity_role: int):
     flag_of_commition = False
     index = 1
-    while index != quantity_role:
+    while index != quantity_role + 1:
         if _session.query(_models.actor).filter(_models.actor.id==index).first() is not None: # if reached last index in actor, raise HTTPException
             if _session.query(_models.role).filter(_models.role.id==index).first() is not None:
                 index += 1
@@ -322,8 +301,8 @@ async def generate_role_values(quantity_role: int):
 # GROUP
 # from sqlalchemy import func # it's for counting something from table # func.count(<raw of table>)
 
-@app.get("/actors_count_by_age_group", tags=["unique commands"])
-async def get_actors_count_by_age_group():
+@app.get("/actors_gender_and_Name_Surname", tags=["unique commands"])
+async def get_actors_gender_and_Name_Surname():
     actors_count_query = (
         _session.query(_models.actor.gender, _models.actor.Name_Surname)
         .group_by(_models.actor.gender, _models.actor.Name_Surname).all())
@@ -381,3 +360,86 @@ async def update_actors_rank(
     )
     _session.commit()
     return f"{update_query} actors updated with new rank."
+
+
+
+
+# JSON FIELD
+
+
+# ACTOR
+@app.post("/insert_data_actor", tags=["JSON_field_actor"])
+async def insert_data(given_id: int, new_data: dict):
+    new_record_actor = _session.query(_models.actor).filter(_models.actor.id==given_id).first()
+    if new_record_actor is not None:
+        new_record_actor.data = new_data
+        _session.add(new_record_actor)
+        _session.commit()
+       # _session.refresh(new_record_actor)
+        return {"message": "Data inserted successfully", "id": new_record_actor.id}
+    else: return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ID NOT FOUND")
+        
+
+@app.get("/retrieve_data_actor/{actor_filter_key}", tags=["JSON_field_actor"])
+async def retrieve_data(actor_filter_key: str):
+    actor_result_rows = _session.query(_models.actor.data).all()
+    actor_result_list = []
+    for row in actor_result_rows:
+        # Assuming row is a tuple or a single value
+        if row[0] is not None and actor_filter_key in row[0]:
+            actor_result_list.append(row[0])
+    if actor_result_rows:
+        return {"message": "Data retrieved successfully", "data": actor_result_list}   
+    else: return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
+
+
+
+# POSTANOVKA
+@app.post("/insert_data_postanovka", tags=["JSON_field_postanovka"])
+async def insert_data(given_id: int, new_data: dict):
+    new_record_postanovka = _session.query(_models.postanovka).filter(_models.postanovka.id==given_id).first()
+    if new_record_postanovka is not None:
+        new_record_postanovka.data = new_data # OVERWRITING, FIX THIS
+        _session.add(new_record_postanovka)
+        _session.commit()
+        return {"message": "Data inserted successfully", "id": new_record_postanovka.id}
+    else: return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ID NOT FOUND")
+        
+
+@app.get("/retrieve_data_postanovka/{postanovka_filter_key}", tags=["JSON_field_postanovka"])
+async def retrieve_data(postanovka_filter_key: str):
+    postanovka_result_rows = _session.query(_models.postanovka.data).all()
+    postanovka_result_list = []
+    for row in postanovka_result_rows:
+        # Assuming row is a tuple or a single value
+        if row[0] is not None and postanovka_filter_key in row[0]:
+            postanovka_result_list.append(row[0])
+    if postanovka_result_rows:
+        return {"message": "Data retrieved successfully", "data": postanovka_result_list}  
+    else: return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
+
+
+
+# ROLE
+@app.post("/insert_data_role", tags=["JSON_field_role"])
+async def insert_data(given_id: int, new_data: dict):
+    new_record_role = _session.query(_models.role).filter(_models.role.id==given_id).first()
+    if new_record_role is not None:
+        new_record_role.data = new_data
+        _session.add(new_record_role)
+        _session.commit()
+        return {"message": "Data inserted successfully", "id": new_record_role.id}
+    else: return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ID NOT FOUND")
+        
+
+@app.get("/retrieve_data_role/{role_filter_key}", tags=["JSON_field_role"])
+async def retrieve_data(role_filter_key: str):
+    role_result_rows = _session.query(_models.role.data).all()
+    role_result_list = []
+    for row in role_result_rows:
+        # Assuming row is a tuple or a single value
+        if row[0] is not None and role_filter_key in row[0]:
+            role_result_list.append(row[0])
+    if role_result_rows:
+        return {"message": "Data retrieved successfully", "data": role_result_list}  
+    else: return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")

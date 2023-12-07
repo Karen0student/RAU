@@ -1,18 +1,18 @@
-"""Creation of tables
+"""creating tables
 
-Revision ID: 32d49c5ee830
+Revision ID: 8810637c9d2f
 Revises: 
-Create Date: 2023-11-29 14:26:28.974932
+Create Date: 2023-12-07 20:44:34.287591
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '32d49c5ee830'
+revision: str = '8810637c9d2f'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,6 +27,7 @@ def upgrade() -> None:
     sa.Column('age', sa.Integer(), nullable=False),
     sa.Column('gender', sa.String(length=10), nullable=True),
     sa.Column('ampula', sa.String(length=20), nullable=True),
+    sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_actor_Name_Surname'), 'actor', ['Name_Surname'], unique=False)
@@ -38,6 +39,7 @@ def upgrade() -> None:
     sa.Column('group_number', sa.Integer(), nullable=False),
     sa.Column('director', sa.String(length=20), nullable=False),
     sa.Column('date_of', sa.Date(), nullable=True),
+    sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['actor.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -47,6 +49,7 @@ def upgrade() -> None:
     sa.Column('ampula', sa.String(length=20), nullable=True),
     sa.Column('piesa', sa.String(length=20), nullable=True),
     sa.Column('gender', sa.String(length=10), nullable=True),
+    sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.ForeignKeyConstraint(['id'], ['actor.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
