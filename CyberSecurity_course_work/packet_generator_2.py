@@ -3,6 +3,7 @@ from scapy.all import IP, TCP, ICMP, UDP, wrpcap, sendp, rdpcap, send, Raw, sr1,
 import binascii
 import sys
 import os
+import random
 
 
 icmp_index = 0
@@ -55,6 +56,15 @@ def send_content(Protocol, src_ip, src_port, dst_ip, dst_port, content, flow):
     global icmp_index
     global tcp_index
     global udp_index
+    if src_ip == "any":
+        src_ip = "192.168.0." + str(random.randint(1, 254))
+    if dst_ip == "any":
+        dst_ip = "192.168.0." + str(random.randint(1, 254))
+    if src_port == "any":
+        src_port = int(random.randint(1, 65535))
+    if dst_port == "any":
+        dst_port = int(random.randint(1, 65535))
+        
     ip_layer = IP(src=str(src_ip), dst=str(dst_ip))
     if content:
         content_convert = split_and_convert(content)
@@ -64,12 +74,14 @@ def send_content(Protocol, src_ip, src_port, dst_ip, dst_port, content, flow):
     else:
         print("payload is empty")
         payload = ""
+    
     if Protocol == "icmp":
         packet = ip_layer / ICMP()
         if icmp_index == 0 or tcp_index == 0 or udp_index == 0:
             folders()
         wrpcap(f"pcaps/icmp/{str(icmp_index)}.pcap", packet)
         icmp_index += 1
+    
     elif Protocol == "tcp":
         tcp_layer = TCP(sport=int(src_port), dport=int(dst_port), flags='PA')
         packet = ip_layer / tcp_layer / Raw(load=payload)
@@ -80,6 +92,7 @@ def send_content(Protocol, src_ip, src_port, dst_ip, dst_port, content, flow):
         else:
             wrpcap(f"pcaps/tcp/undefined_flow/{str(tcp_index)}.pcap", packet)
         tcp_index += 1
+    
     elif Protocol == "udp":
         udp_layer = UDP(sport=int(src_port), dport=int(dst_port)) / Raw(load=payload)
         packet = ip_layer / udp_layer / Raw(load=payload)
@@ -200,7 +213,7 @@ def main():
 
             
         send_content(Protocol, Source_address, Source_port, Destination_address, Destination_port, content_end, flow)
-
+        exit(0)
 
 
 main()
