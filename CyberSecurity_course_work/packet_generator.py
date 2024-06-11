@@ -10,6 +10,44 @@ icmp_index = 0
 tcp_index = 0
 udp_index = 0
 
+
+def extract_content(string):
+    everything = []
+    flow = ""
+    content = []
+    distance = []
+    within = []
+    sid = ""
+    rev = ""
+    parts = string.split('(')
+    for part in parts:
+            attributes = part.split(';')
+            for attribute in attributes:
+                if 'flow:' in attribute:
+                    flow += attribute.split(':')[1].strip('"')
+                if 'content:' in attribute:
+                    content.append(attribute.split(':')[1].strip('"'))
+                if 'distance:' in attribute:
+                    distance.append(attribute.split(':')[1].strip('"'))
+                else:
+                    distance.append("#")
+                if 'within:' in attribute:
+                    within.append(attribute.split(':')[1].strip('"'))
+                else:
+                    within.append("#")
+                if 'sid:' in attribute:
+                    sid += attribute.split(':')[1].strip('"')
+                if 'rev:' in attribute:
+                    rev += attribute.split(':')[1].strip('"')
+    everything.append(flow)
+    everything.append(content)
+    everything.append(distance)
+    everything.append(within)
+    everything.append(sid)
+    everything.append(rev)
+    return everything
+
+
 def folders(flow=""):
     if not os.path.exists("pcaps"):
         os.makedirs("pcaps")
@@ -105,14 +143,7 @@ def main():
     while True:
         wordlist = sys.stdin.readline()
         wordlist = str(wordlist)
-        pattern_flow = r'flow:(.*?);'
-        pattern_content = r'content:"(.*?)";\s*(?:distance:(\d+);)?\s*(?:within:(\d+);)?'
-        pattern_reference = r'reference:(.*?);'
-        pattern_classtype = r'classtype:(.*?);'
-        pattern_sid = r'sid:(\d+);'
-        pattern_rev = r'rev:(\d+);'
-        pattern_metadata = r'metadata:(.*?);'
-
+        extracted_content = extract_content(wordlist)
         Rule_header = re.split(r'\(.*\)', wordlist)
         Rule_header = Rule_header[0].strip()
         Rule_header = [part.strip() for part in Rule_header.split(' ') if part != '->']
@@ -123,34 +154,13 @@ def main():
         Destination_address = str(Rule_header[4])
         Destination_port = str(Rule_header[5])
 
-        flow_match = re.search(pattern_flow, wordlist)
-        flow = flow_match.group(1) if flow_match else None
-        if flow:
-            flow = flow.replace("(", "").replace(")", "")
-        Content = []
-        Distance = []
-        Within = []
-        content_matches = re.findall(pattern_content, wordlist)
-        for match in content_matches:
-            Content.append(f"{match[0]}")
-            Distance.append(match[1] if match[1] else "#")
-            Within.append(match[2] if match[2] else "#")
-
-        reference_match = re.search(pattern_reference, wordlist)
-        reference = reference_match.group(1) if reference_match else None
-
-        classtype_match = re.search(pattern_classtype, wordlist)
-        classtype = classtype_match.group(1) if classtype_match else None
-
-        sid_match = re.search(pattern_sid, wordlist)
-        sid = sid_match.group(1) if sid_match else None
-
-        rev_match = re.search(pattern_rev, wordlist)
-        rev = rev_match.group(1) if rev_match else None
-
-        metadata_match = re.search(pattern_metadata, wordlist)
-        metadata = metadata_match.group(1) if metadata_match else None
-
+        flow = extracted_content[0]
+        Content = extracted_content[1]
+        Distance = extracted_content[2]
+        Within = extracted_content[3]
+        sid = extracted_content[4]
+        rev = extracted_content[5]
+        
         print(f"Action: {Action}")
         print(f"Protocol: {Protocol}")
         print(f"Source_address: {Source_address}")
@@ -161,14 +171,11 @@ def main():
         print(f"Content: {Content}")
         print(f"Distance: {Distance}")
         print(f"Within: {Within}")
-        print(f"Reference: {reference}")
-        print(f"Classtype: {classtype}")
         print(f"SID: {sid}")
         print(f"Rev: {rev}")
-        print(f"Metadata: {metadata}")
         
         if Source_address == Destination_address:
-            print("wrong addressation !!!!!!!!!!!!!!!!!!")
+            print("wrong addressation!")
             continue
         
         # Content parsing
@@ -217,3 +224,5 @@ def main():
 
 
 main()
+
+# alert tcp 192.168.0.152 22 -> 192.168.0.184 22 (msg:"ET TROJAN Observed Malicious SSL Cert (MageCart CnC)";content:"|16|";content:"|0b|";sid:2026820;rev:2;)
