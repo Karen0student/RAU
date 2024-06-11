@@ -39,6 +39,12 @@ def extract_content(string):
                     sid += attribute.split(':')[1].strip('"')
                 if 'rev:' in attribute:
                     rev += attribute.split(':')[1].strip('"')
+    if flow == "":
+        flow = None
+    if sid == "":
+        sid = None
+    if rev == "":
+        rev = None
     everything.append(flow)
     everything.append(content)
     everything.append(distance)
@@ -225,4 +231,5 @@ def main():
 
 main()
 
-# alert tcp 192.168.0.152 22 -> 192.168.0.184 22 (msg:"ET TROJAN Observed Malicious SSL Cert (MageCart CnC)";content:"|16|";content:"|0b|";sid:2026820;rev:2;)
+# testing purpose
+# alert tcp 192.168.0.158 22 -> 192.168.0.184 22 (msg:"ET TROJAN Observed Malicious SSL Cert (MageCart CnC)";content:"User-Agent|3A| DownloadNetFile|0D 0A|";content:"|16|";content:"|0b|";within:8;content:"|55 04 03|";distance:0;content:"|13|content-delivery.cc";distance:1;within:21;fast_pattern;content:"|55 04 06|";distance:0;content:"|02|US";distance:1;within:3;content:"|55 04 0a|";distance:0;content:"|0d|Lets Encrypt";distance:1;within:14;content:"|55 04 03|";distance:0;content:"|1a|Lets Encrypt Authority X3";distance:1;within:27;reference:url,blog.trendmicro.com/trendlabs-security-intelligence/new-magecart-attack-delivered-through-compromised-advertising-supply-chain/;sid:2026820;rev:2;metadata:affected_asset dst, attack_target Client_Endpoint, created_at 2019_01_16, deployment Perimeter, former_category MALWARE, malware_family MageCart, performance_impact Low, signature_severity Major, tag SSL_Malicious_Cert, tias_category Malware, updated_at 2020_09_16)
