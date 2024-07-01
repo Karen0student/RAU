@@ -241,6 +241,9 @@ def main():
 
     while True:
         wordlist = sys.stdin.readline()
+        if wordlist == "":
+            print("Done")
+            break
         wordlist = str(wordlist)
         extracted_content = extract_content(wordlist)
         Rule_header = re.split(r'\(.*\)', wordlist)
